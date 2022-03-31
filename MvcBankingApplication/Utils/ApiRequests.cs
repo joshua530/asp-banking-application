@@ -19,8 +19,8 @@ namespace MvcBankingApplication.Utils
             using (var response = await client.SendAsync(request))
             {
                 response.EnsureSuccessStatusCode();
-                var result = await response.Content.ReadAsStringAsync();
-                var jsonObj = JObject.Parse(result);
+                String result = await response.Content.ReadAsStringAsync();
+                JObject jsonObj = JObject.Parse(result);
                 StockObj stock = new StockObj();
                 if (jsonObj.ContainsKey("Global Quote"))
                 {
