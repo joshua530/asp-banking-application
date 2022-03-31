@@ -7,7 +7,7 @@ namespace MvcBankingApplication.Services.Stocks
 {
 
 
-    class StockApiService
+    public class StockApiService
     {
         public String[] StockNames = StockNamesService.Stocks;
         IDatabase Cache = RedisConnectorHelper.Connection.GetDatabase();
@@ -35,9 +35,9 @@ namespace MvcBankingApplication.Services.Stocks
             set { }
         }
 
-        private string SerializeStocks(StockObj[] stocks)
+        public string SerializeStocks(StockObj[] stocks)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(StockObj));
+            XmlSerializer serializer = new XmlSerializer(typeof(StockObj[]));
             using (StringWriter sw = new StringWriter())
             {
                 serializer.Serialize(sw, stocks);
@@ -45,9 +45,9 @@ namespace MvcBankingApplication.Services.Stocks
             }
         }
 
-        private StockObj[] DeserializeStocksStr(string stocksStr)
+        public StockObj[] DeserializeStocksStr(string stocksStr)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(StockObj));
+            XmlSerializer serializer = new XmlSerializer(typeof(StockObj[]));
             using (StringReader sr = new StringReader(stocksStr))
             {
                 return (StockObj[])serializer.Deserialize(sr);
@@ -59,7 +59,7 @@ namespace MvcBankingApplication.Services.Stocks
             return DateTime.Now.ToString("H:mm:ss dd-MM-yyyy");
         }
 
-        private bool ExpirationTimePassed(RedisValue time)
+        public bool ExpirationTimePassed(RedisValue time)
         {
             if (time == RedisValue.Null) return true;
             DateTime expirationTime = DateTime.ParseExact((string)time, "H:mm:ss dd-MM-yyyy", CultureInfo.InvariantCulture);
