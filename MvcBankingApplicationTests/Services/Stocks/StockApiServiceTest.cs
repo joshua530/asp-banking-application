@@ -55,6 +55,7 @@ public class StockApiServiceTest
         Assert.AreEqual(expected, actual);
     }
 
+    [TestMethod]
     public void TestNullStockListDeserialization()
     {
         string nullStocksXml = "<?xml version=\"1.0\" encoding=\"utf-16\"?><ArrayOfStockObj xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:nil=\"true\" />";
