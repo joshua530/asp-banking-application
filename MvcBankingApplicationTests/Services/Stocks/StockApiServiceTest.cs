@@ -5,10 +5,28 @@ using System;
 
 namespace MvcBankingApplicationTests;
 
+#nullable enable
 [TestClass]
 public class StockApiServiceTest
 {
     public StockApiService StockService = new StockApiService();
+
+    [TestMethod]
+    public void TestExpiredTime()
+    {
+        string expiredTime = DateTime.Now.AddMinutes(-1).ToString("H:mm:ss dd-MM-yyyy");
+        bool isExpired = StockService.ExpirationTimePassed(expiredTime);
+        Assert.IsTrue(isExpired);
+    }
+
+    [TestMethod]
+    public void TestNonExpiredTime()
+    {
+        string nonExpired = DateTime.Now.AddHours(1).ToString("H:mm:ss dd-MM-yyyy");
+        bool isExpired = StockService.ExpirationTimePassed(nonExpired);
+        Assert.IsFalse(isExpired);
+    }
+
     [TestMethod]
     public void TestStockSerialization()
     {
@@ -82,3 +100,4 @@ public class StockApiServiceTest
         };
     }
 }
+#nullable disable
