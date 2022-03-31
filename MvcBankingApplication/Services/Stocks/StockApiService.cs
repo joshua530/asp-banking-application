@@ -19,7 +19,7 @@ namespace MvcBankingApplication.Services.Stocks
                 RedisValue cachedStocks = Cache.StringGet("stocks");
                 RedisValue expirationTime = Cache.StringGet("expiration_time");
                 StockObj[] stocks;
-                if (cachedStocks == RedisValue.Null || ExpirationTimePassed(expirationTime))
+                if (cachedStocks == RedisValue.Null || ExpirationTimePassed((string)expirationTime))
                 {
                     stocks = ApiRequests.GetDataForStocks(StockNames);
                     // serialize the stocks
@@ -29,10 +29,9 @@ namespace MvcBankingApplication.Services.Stocks
                     Cache.StringSet("expiration_time", CurrentTime());
                     return stocks;
                 }
-                string stockStr = Cache.StringGet("expiration_time");
+                string stockStr = Cache.StringGet("stocks");
                 return DeserializeStocksStr(stockStr);
             }
-            set { }
         }
 
         public string SerializeStocks(StockObj[] stocks)
@@ -59,10 +58,10 @@ namespace MvcBankingApplication.Services.Stocks
             return DateTime.Now.ToString("H:mm:ss dd-MM-yyyy");
         }
 
-        public bool ExpirationTimePassed(RedisValue time)
+        public bool ExpirationTimePassed(string time)
         {
             if (time == RedisValue.Null) return true;
-            DateTime expirationTime = DateTime.ParseExact((string)time, "H:mm:ss dd-MM-yyyy", CultureInfo.InvariantCulture);
+            DateTime expirationTime = DateTime.ParseExact(time, "H:mm:ss dd-MM-yyyy", CultureInfo.InvariantCulture);
             DateTime now = DateTime.Now;
 
             if (expirationTime < now)
