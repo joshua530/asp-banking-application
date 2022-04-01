@@ -22,6 +22,7 @@ namespace MvcBankingApplication.Models.Transactions
         [Required]
         public int AccountCreditedId { get; set; }
         [Required]
-        public String TransactionType { get; set; } = String.Empty;
+        [EnumDataType(typeof(TransactionTypes))]
+        public object TransactionType { get; set; }
     }
 }
