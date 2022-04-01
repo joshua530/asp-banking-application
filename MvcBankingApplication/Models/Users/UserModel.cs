@@ -10,7 +10,7 @@ namespace MvcBankingApplication.Models.Users
         public string ImageUrl { get; set; } = "/images/avatar.png";
 
         [Required]
-        [StringLength(50, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+        [StringLength(50, MinimumLength = 8)]
         [RegularExpression(
             @"([@_!#$%^&*()<>?/|}{~:]|[0-9])+.*([@_!#$%^&*()<>?/|}{~:]|[0-9])+",
             ErrorMessage = "Password must contain at least one number(zero through nine)" +
