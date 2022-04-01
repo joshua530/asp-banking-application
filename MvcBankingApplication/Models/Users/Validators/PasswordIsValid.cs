@@ -2,8 +2,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MvcBankingApplication.Models.Users.Validators
 {
-
-    public class ValidPassword : ValidationAttribute
+    /**
+     * <summary>
+     * validates a password before it is saved
+     * </summary>
+     */
+    public class PasswordIsValid : ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
@@ -16,7 +20,7 @@ namespace MvcBankingApplication.Models.Users.Validators
             if (value == null)
                 return new ValidationResult("Password cannot be null");
 
-            string password = value.ToString();
+            string password = (string)value;
             if (password.Length < 8)
                 return new ValidationResult("Minimum password length is 8");
 
