@@ -7,7 +7,7 @@ namespace MvcBankingApplication.Models.Users
     abstract public class UserModel
     {
         private string _password = String.Empty;
-        public string ImageUrl { get; set; } = String.Empty;
+        public string ImageUrl { get; set; } = "/images/avatar.png";
 
         [Required]
         [StringLength(50, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
