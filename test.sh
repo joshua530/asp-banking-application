@@ -5,4 +5,6 @@ if [ ! $(command -v dotnet 2>/dev/null) ]; then
     exit 1
 fi
 
-dotnet test MvcBankingApplicationTests/MvcBankingApplicationTests.csproj
+CURRENT_DIR=$(dirname "$0")
+
+dotnet test $CURRENT_DIR/MvcBankingApplicationTests/MvcBankingApplicationTests.csproj
