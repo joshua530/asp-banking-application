@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+//TODO how is custom validator tested?
 namespace MvcBankingApplication.Models.Users.Validators
 {
     /**
@@ -17,8 +18,8 @@ namespace MvcBankingApplication.Models.Users.Validators
             };
             char[] nums = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
 
-            if (value == null)
-                return new ValidationResult("Password cannot be null");
+            if (value == null || (string)value == "")
+                return new ValidationResult("Password cannot be empty");
 
             string password = (string)value;
             if (password.Length < 8)

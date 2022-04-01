@@ -8,8 +8,15 @@ namespace MvcBankingApplication.Models.Users
     {
         private string _password = String.Empty;
         public string ImageUrl { get; set; } = String.Empty;
+
         [Required]
-        [Validators.ValidPassword]
+        [StringLength(50, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+        [RegularExpression(
+            @"([@_!#$%^&*()<>?/|}{~:]|[0-9])+.*([@_!#$%^&*()<>?/|}{~:]|[0-9])+",
+            ErrorMessage = "Password must contain at least one number(zero through nine)" +
+            " and one special character(@, _, !, #, $, %, ^, &, *, (, )," +
+            " <, >, ?, /, |, }, {, ~, :)"
+        )]
         public string Password
         {
             get { return _password; }
@@ -90,6 +97,12 @@ namespace MvcBankingApplication.Models.Users
                 rng.GetBytes(newSalt);
                 return newSalt;
             }
+        }
+
+        public override string ToString()
+        {
+            return $"Username<{Username}>; FirstName<{FirstName}>;" +
+            $" LastName<{LastName}>; Password<{Password}>";
         }
     }
 }
