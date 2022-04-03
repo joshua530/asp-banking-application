@@ -36,7 +36,9 @@ namespace MvcBankingApplication.Models.Users
         [Required]
         [RegularExpression(@"[a-zA-Z]{2,10}")]
         public string LastName { get; set; } = String.Empty;
-        public int Id { get; }
+        [Required]
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; } = String.Empty;
 
         /**
          * <summary>
