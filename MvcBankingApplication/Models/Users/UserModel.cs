@@ -7,6 +7,8 @@ namespace MvcBankingApplication.Models.Users
     abstract public class UserModel
     {
         private string _password = String.Empty;
+
+        public int ID { get; set; }
         public string ImageUrl { get; set; } = "/images/avatar.png";
 
         [Required]
