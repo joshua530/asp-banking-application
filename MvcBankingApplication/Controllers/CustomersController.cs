@@ -10,11 +10,11 @@ using MvcBankingApplication.Models.Users;
 
 namespace MvcBankingApplication.Controllers
 {
-  public class CustomerModelController : Controller
+  public class CustomersController : Controller
   {
     private readonly ApplicationContext _context;
 
-    public CustomerModelController(ApplicationContext context)
+    public CustomersController(ApplicationContext context)
     {
       _context = context;
     }
