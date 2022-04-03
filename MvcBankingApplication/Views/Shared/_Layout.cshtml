@@ -18,9 +18,9 @@
 <body>
     <nav class="navbar px-2 sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand text-white text-bolder" href="#">YourBank</a>
+      <a class="navbar-brand text-white text-bolder" href="/">YourBank</a>
       <div>
-        <a href="#" class="text-white me-3 me-sm-5 site-link">Sign up</a>
+        <a asp-controller="CustomerModel" asp-action="Create" class="text-white me-3 me-sm-5 site-link">Sign up</a>
       </div>
     </div>
   </nav>
@@ -33,10 +33,10 @@
     <footer class="py-5">
     <div class="container">
       <div class="d-flex justify-content-between flex-wrap">
-        <a href="#" class="site-link">YourBank.com</a>
+        <a asp-controller="Home" asp-action="Index" class="site-link">YourBank.com</a>
         <p class="ms-2">
-          <a href="#" class="site-link">Policy</a>
-          <a href="#" class="ms-2 site-link">About us</a>
+          <a asp-controller="Home" asp-action="PrivacyPolicy" class="site-link">Privacy policy</a>
+          <a asp-controller="Home" asp-action="About" class="ms-2 site-link">About us</a>
         </p>
       </div>
     </div>
@@ -60,7 +60,7 @@
             </a>
           </div>
           <div>
-            &copy; Copyright 2022. All rights reserved
+            &copy; Copyright @DateTime.Now.Year. All rights reserved
           </div>
         </div>
       </div>
