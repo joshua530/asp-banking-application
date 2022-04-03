@@ -1,0 +1,167 @@
+.bg-img {
+  background-position: bottom right;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("/images/stock_market.jpg");
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/images/stock_market.jpg");
+}
+
+.text-light {
+  font-weight: 400;
+}
+
+.text-lighter {
+  font-weight: 300;
+}
+
+.text-bold {
+  font-weight: 500;
+}
+
+.text-bolder {
+  font-weight: 600;
+}
+
+nav a {
+  text-decoration: none;
+}
+
+.testimonial {
+  text-align: center;
+  border: 1px solid #2c2c2c;
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px;
+  max-width: 200px !important;
+  min-width: 200px !important;
+}
+
+.testimonial img {
+  border-radius: 50%;
+  height: 90px;
+}
+
+.testimonial-text {
+  font-weight: 300;
+}
+
+.testimonial-text::before,
+.testimonial-text::after {
+  content: '"';
+}
+
+.site-link {
+  font-weight: 600;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: #fff !important;
+}
+
+.site-link:hover {
+  text-decoration: underline;
+}
+
+nav {
+  background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("/images/stock_market.jpg");
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("/images/stock_market.jpg");
+  padding: 2em 1em !important;
+}
+
+footer {
+  background-color: #00090b;
+}
+
+footer * {
+  color: #fff;
+}
+
+.navbar-brand {
+  font-size: 2rem;
+}
+
+.form-img {
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+.btn-blue {
+  background-color: #00404e;
+  -webkit-box-shadow: none;
+          box-shadow: none;
+  outline: none;
+  height: 3.2em;
+  color: #fff !important;
+  border: 1px solid #00404e;
+}
+
+.btn-blue:hover,
+.btn-blue:focus,
+.btn-blue:active,
+.btn-blue:active:focus {
+  background-color: #077e99 !important;
+  outline: none;
+  -webkit-box-shadow: 1px 1px 8px #000;
+          box-shadow: 1px 1px 8px #000;
+}
+
+.btn-blue:hover {
+  -webkit-box-shadow: 0 0 5px #000;
+          box-shadow: 0 0 5px #000;
+}
+
+.navbar-dark .navbar-toggler {
+  border-color: #fff;
+}
+
+.navbar-pic {
+  border-radius: 50%;
+  height: 45px;
+}
+
+.dropdown-menu {
+  right: 0 !important;
+}
+
+.text-green {
+  color: greenyellow;
+}
+
+.text-red {
+  color: orangered;
+}
+
+/* remove arrows from number input */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+.notification-closer {
+  cursor: pointer;
+}
+
+.paginate {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.paginate .numbering a {
+  margin: 0 5px;
+}
+
+.paginate .wrapper {
+  margin: 0 5px;
+}
+
+.form-img {
+  width: 40px;
+  border-radius: 50%;
+}
