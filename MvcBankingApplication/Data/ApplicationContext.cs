@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MvcBankingApplication.Models.Users;
+using MvcBankingApplication.Models.Transactions;
 
     public class ApplicationContext : DbContext
     {
@@ -14,4 +15,6 @@ using MvcBankingApplication.Models.Users;
         }
 
         public DbSet<MvcBankingApplication.Models.Users.CustomerModel> CustomerModel { get; set; }
+
+        public DbSet<MvcBankingApplication.Models.Transactions.TransactionModel> TransactionModel { get; set; }
     }
