@@ -1,5 +1,5 @@
 namespace MvcBankingApplication.Models.Users
 {
-    class AdminModel : BankUserModel
+    public class AdminModel : BankUserModel
     { }
 }
