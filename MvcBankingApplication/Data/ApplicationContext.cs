@@ -17,4 +17,6 @@ using MvcBankingApplication.Models.Transactions;
         public DbSet<MvcBankingApplication.Models.Users.CustomerModel> CustomerModel { get; set; }
 
         public DbSet<MvcBankingApplication.Models.Transactions.TransactionModel> TransactionModel { get; set; }
+
+        public DbSet<MvcBankingApplication.Models.Users.CashierModel> CashierModel { get; set; }
     }
