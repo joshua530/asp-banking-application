@@ -1,6 +1,6 @@
 namespace MvcBankingApplication.Models.Accounts
 {
-    class BankCashAccountModel : AccountModel
+    public class BankCashAccountModel : AccountModel
     {
     }
 }
