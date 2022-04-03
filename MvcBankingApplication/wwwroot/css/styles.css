@@ -165,3 +165,7 @@ input[type='number'] {
   width: 40px;
   border-radius: 50%;
 }
+
+.profile-img {
+  max-width: 250px;
+}
