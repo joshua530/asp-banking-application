@@ -1,0 +1,22 @@
+@model MvcBankingApplication.Models.Users.CustomerModel
+
+@{
+  ViewData["Title"] = "{username}'s profile";
+}
+
+<div class="bg-dark py-5 text-white">
+  <div class="container">
+    <div class="d-sm-flex">
+      <img src="/images/10.jpg" alt="{user}" class="rounded me-sm-3">
+      <div>
+        <h2 class="mt-3 mt-sm-0">{Name}</h2>
+        <p>Joined on: {date}</p>
+        <p>Account status: <span class="text-green">active</span> | <span class="text-red">inactive</span></p>
+      </div>
+    </div>
+    <div>
+      <a href="#" class="site-link d-block mb-2 mt-sm-3">edit profile</a>
+      <a href="#" class="site-link">change password</a>
+    </div>
+  </div>
+</div>
