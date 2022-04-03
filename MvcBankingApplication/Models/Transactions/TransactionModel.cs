@@ -4,7 +4,7 @@ namespace MvcBankingApplication.Models.Transactions
 {
   public class TransactionModel
   {
-    public int Id { get; }
+    public int ID { get; }
     [Required]
     [DataType(DataType.DateTime), DisplayFormat(
         DataFormatString = "H:mm:ss dd-MM-yyyy"
