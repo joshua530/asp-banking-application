@@ -1,0 +1,124 @@
+@model IEnumerable<MvcBankingApplication.Models.Transactions.TransactionModel>
+
+@{
+  ViewData["Title"] = "Index";
+}
+
+<div class="py-5 bg-dark">
+  <div class="container">
+    <div class="d-flex justify-content-center">
+      <form class="text-white my-4">
+        <div class="form-group">
+          <label for="transaction-id" class="mb-2">Transaction id</label>
+          <div class="d-flex">
+            <input placeholder="Enter transaction id" type="number" name="transaction-id" class="form-control"
+              id="transaction-id">
+            <button class="btn btn-blue">search</button>
+          </div>
+        </div>
+        <div class="row my-2">
+          <div class="col">
+            <div class="form-outline">
+              <label class="form-label" for="min-amount">Min amount</label>
+              <input type="text" name="min-amount" id="min-amount" class="form-control" />
+            </div>
+          </div>
+          <div class="col text-white">
+            <div class="form-outline">
+              <label class="form-label" for="max-amount">Max amount</label>
+              <input type="text" name="max-amount" id="max-amount" class="form-control" />
+            </div>
+          </div>
+        </div>
+        <div class="row my-2">
+          <div class="col">
+            <div class="form-outline">
+              <label class="form-label" for="start-date">Start date</label>
+              <input type="date" name="start-date" id="start-date" class="form-control" />
+            </div>
+          </div>
+          <div class="col text-white">
+            <div class="form-outline">
+              <label class="form-label" for="end-date">End date</label>
+              <input type="date" name="end-date" id="end-date" class="form-control" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <div class="d-flex">
+            <p class="text-uppercase me-5">Transaction type</p>
+            <div class="form-group me-3">
+              <input type="checkbox" name="CR" id="credit">
+              <label for="credit">Credit</label>
+            </div>
+            <div class="form-group">
+              <input type="checkbox" name="DR" id="debit">
+              <label for="debit">Debit</label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group mt-3">
+          <button class="btn-blue w-100">search</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="overflow-auto">
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th scope="col" class="text-capitalize">id</th>
+            <th scope="col" class="text-capitalize">date</th>
+            <th scope="col" class="text-capitalize">amount</th>
+            <th scope="col" class="text-capitalize">type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a class="site-link" asp-controller="Transactions" asp-action="Details">
+                1
+              </a>
+            </td>
+            <td>22/2/2021</td>
+            <td>2543</td>
+            <td class="text-green" title="debit">DR</td>
+          </tr>
+          <tr>
+            <td>
+              <a class="site-link" asp-controller="Transactions" asp-action="Details">
+                2
+              </a>
+            </td>
+            <td>22/2/2021</td>
+            <td>25435</td>
+            <td class="text-red" title="credit">CR</td>
+          </tr>
+          <tr>
+            <td>
+              <a class="site-link" asp-controller="Transactions" asp-action="Details">
+                3
+              </a>
+            </td>
+            <td>02/1/2021</td>
+            <td>4364</td>
+            <td class="text-green">DR</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div aria-label="transaction pagination">
+      <div class="paginate mt-3">
+        <a href="#" class="site-link wrapper" disabled>start</a>
+        <a href="#" class="site-link wrapper">previous</a>
+        <div class="numbering">
+          <a href="#" class="site-link">1</a>
+          <a href="#" class="site-link">2</a>
+          <a href="#" class="site-link">3</a>
+        </div>
+        <a href="#" class="site-link wrapper">next</a>
+        <a href="#" class="site-link wrapper">end</a>
+      </div>
+    </div>
+  </div>
+</div>
