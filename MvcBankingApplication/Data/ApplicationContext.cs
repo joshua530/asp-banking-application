@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models.Transactions;
+using MvcBankingApplication.Models.Notifications;
 
     public class ApplicationContext : DbContext
     {
@@ -21,4 +22,6 @@ using MvcBankingApplication.Models.Transactions;
         public DbSet<MvcBankingApplication.Models.Users.CashierModel> CashierModel { get; set; }
 
         public DbSet<MvcBankingApplication.Models.Users.AdminModel> AdminModel { get; set; }
+
+        public DbSet<MvcBankingApplication.Models.Notifications.NotificationModel> NotificationModel { get; set; }
     }
