@@ -7,7 +7,18 @@ namespace MvcBankingApplication.Models.Accounts
         public int ID { get; set; }
         [Required]
         public int AccountNumber { get; set; }
-        public string Type { get; set; } = String.Empty;
+
+        [Required]
+        [EnumDataType(typeof(AccountType))]
+        public int Type { get; set; } = 1;
+
         public double Balance { get; set; } = 0;
+    }
+
+    public enum AccountType
+    {
+        CustomerAccount = 1,
+        BankCashAccount = 2,
+        BankOverdraftAccount = 3
     }
 }
