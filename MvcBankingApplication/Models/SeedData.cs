@@ -17,7 +17,7 @@ public class SeedData
                 provider.GetRequiredService<DbContextOptions<ApplicationContext>>()))
         {
             // data has already been seeded
-            if (!context.CashierModel.Any())
+            if (context.CashierModel.Any())
             {
                 return;
             }
@@ -126,6 +126,8 @@ public class SeedData
                     Balance = 2000000000
                 }
             );
+
+            context.SaveChanges();
         }
     }
 }
