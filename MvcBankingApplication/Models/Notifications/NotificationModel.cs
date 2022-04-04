@@ -10,12 +10,7 @@ public class NotificationModel
     [Required]
     public int UserId { get; set; }
 
-    /// <summary>
-    /// The types are:
-    ///    0 - success;
-    ///    1 - info;
-    ///    2 - warning;
-    ///    3 - danger
-    /// </summary>
+    [Required]
+    [EnumDataType(typeof(NotificationTypes))]
     public int Type { get; set; }
 }
