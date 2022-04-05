@@ -7,27 +7,29 @@ using Microsoft.EntityFrameworkCore;
 using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models.Transactions;
 using MvcBankingApplication.Models.Notifications;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-public class ApplicationContext : DbContext
+public class ApplicationContext : IdentityDbContext<ApplicationUser>
 {
     public ApplicationContext(DbContextOptions<ApplicationContext> options)
         : base(options)
     {
     }
 
-    public DbSet<MvcBankingApplication.Models.Users.CustomerModel> CustomerModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Users.Customer> Customers { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Transactions.TransactionModel> TransactionModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Transactions.Transaction> Transactions { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Users.CashierModel> CashierModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Users.Cashier> Cashiers { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Users.AdminModel> AdminModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Users.Admin> Admins { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Notifications.NotificationModel> NotificationModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Notifications.Notification> Notifications { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Accounts.CustomerAccountModel> CustomerAccountModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Accounts.CustomerAccount> CustomerAccounts { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Accounts.BankCashAccountModel> BankCashAccountModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Accounts.BankCashAccount> BankCashAccount { get; set; }
 
-    public DbSet<MvcBankingApplication.Models.Accounts.BankOverdraftAccountModel> BankOverdraftAccountModel { get; set; }
+    public DbSet<MvcBankingApplication.Models.Accounts.BankOverdraftAccount> BankOverdraftAccount { get; set; }
 }

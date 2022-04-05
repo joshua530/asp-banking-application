@@ -34,15 +34,15 @@ namespace MvcBankingApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var notificationModel = await _context.NotificationModel.FindAsync(id);
-            _context.NotificationModel.Remove(notificationModel);
+            var notificationModel = await _context.Notifications.FindAsync(id);
+            _context.Notifications.Remove(notificationModel);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool NotificationModelExists(int id)
         {
-            return _context.NotificationModel.Any(e => e.Id == id);
+            return _context.Notifications.Any(e => e.Id == id);
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace MvcBankingApplication.Utils
 {
+#pragma warning disable CS8632
     public class StockObj
     {
         public string Symbol { get; set; } = String.Empty;
@@ -9,6 +10,11 @@ namespace MvcBankingApplication.Utils
         public override string ToString()
         {
             return $"{Symbol} | {Price} | {PercentChange}";
+        }
+
+        public override int GetHashCode()
+        {
+            return Symbol.GetHashCode();
         }
 
         public override bool Equals(Object? compare)
@@ -25,4 +31,5 @@ namespace MvcBankingApplication.Utils
             return true;
         }
     }
+#pragma warning restore CS8632
 }
