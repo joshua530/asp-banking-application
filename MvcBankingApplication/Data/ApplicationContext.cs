@@ -23,9 +23,6 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>()
                 .Property(e => e.ImageUrl)
                 .HasDefaultValue("/images/users/avatar.png");
-        builder.Entity<ApplicationUser>()
-                .Property(e => e.DateCreated)
-                .HasDefaultValue(DateTime.Now);
 
         base.OnModelCreating(builder);
     }
