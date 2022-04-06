@@ -15,10 +15,10 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; }
 
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [DataType(DataType.Date)]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     [DisplayFormat(DataFormatString = "{0:MMMM dd, yyyy}")] // January 12, 2001
-    public DateTime? DateCreated { get; set; }
+    public DateTime DateCreated { get; set; }
 
     public string ImageUrl { get; set; }
 
