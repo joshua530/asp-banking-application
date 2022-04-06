@@ -7,7 +7,9 @@
 <ul class="navbar-nav">
   @if (SignInManager.IsSignedIn(User))
   {
-    var userImage = UserManager.GetUserAsync(User).GetAwaiter().GetResult().ImageUrl;
+    var user = UserManager.GetUserAsync(User).GetAwaiter().GetResult();
+    var userImage = user.ImageUrl;
+    var userId = user.Id;
 
     <li class="nav-item pe-3">
       <a class="nav-link text-white" href="#" title="You have 3 notifications">
@@ -21,7 +23,8 @@
         <img src="@userImage" class="navbar-pic" alt="@UserManager.GetUserName(User)'s-image">
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <li><a class="dropdown-item text-dark me-3 me-sm-5" asp-controller="Users" asp-action="Profile">Profile</a></li>
+        <li><a class="dropdown-item text-dark me-3 me-sm-5" asp-controller="Users" asp-action="Profile"
+          asp-route-userId="@userId">Profile</a></li>
         <li><a class="dropdown-item" href="#">My account</a></li>
         <li>
           <hr class="dropdown-divider">
