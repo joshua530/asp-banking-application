@@ -16,8 +16,8 @@
     <div class="container-fluid">
       <a class="navbar-brand text-white text-bolder" href="/">YourBank</a>
       <div>
-        <a asp-controller="Customers" asp-action="SignUp" class="text-white me-3 me-sm-5 site-link">Sign up</a>
-        <a asp-controller="Home" asp-action="Login" class="text-white me-3 me-sm-5 site-link">Login</a>
+        <a asp-area="Identity" asp-page="/Account/Register" class="text-white me-3 me-sm-5 site-link">Sign up</a>
+        <a asp-area="Identity" asp-page="/Account/Login" class="text-white me-3 me-sm-5 site-link">Login</a>
       </div>
     </div>
   </nav>
