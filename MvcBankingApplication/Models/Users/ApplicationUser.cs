@@ -14,6 +14,14 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; } = String.Empty;
 
+    public string FullName
+    {
+        get
+        {
+            return $"{FirstName} {LastName}";
+        }
+    }
+
     public override string ToString()
     {
         return $"Username<{UserName}>; FirstName<{FirstName}>;" +
