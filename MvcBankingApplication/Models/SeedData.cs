@@ -24,10 +24,9 @@ public class SeedData
             {
                 return;
             }
-            var scopeFactory = provider.GetRequiredService<IServiceScopeFactory>();
-            var scope = scopeFactory.CreateScope();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            var userManager = provider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
 
             //########### roles #################
             IdentityRole R_Customer = new IdentityRole("customer");
@@ -50,7 +49,7 @@ public class SeedData
                 Email = "johndoe@email.com",
                 UserName = "johndoe"
             };
-            await userManager.CreateAsync(cashier, "abcdef");
+            await userManager.CreateAsync(cashier, "abcdef*A2");
             await userManager.AddToRoleAsync(cashier, "cashier");
 
             var admin = new Users.Admin
@@ -62,7 +61,7 @@ public class SeedData
                 UserName = "alicedoe",
                 IsAdmin = true
             };
-            await userManager.CreateAsync(admin, "abcdef");
+            await userManager.CreateAsync(admin, "abcdef*A2");
             await userManager.AddToRoleAsync(admin, "admin");
 
             var customer = new Users.Customer
@@ -72,7 +71,7 @@ public class SeedData
                 UserName = "janedoe",
                 Email = "janedoe@email.com",
             };
-            await userManager.CreateAsync(customer, "abcdef");
+            await userManager.CreateAsync(customer, "abcdef*A2");
             await userManager.AddToRoleAsync(customer, "customer");
 
 
