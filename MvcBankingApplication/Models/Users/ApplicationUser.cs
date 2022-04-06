@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace MvcBankingApplication.Models.Users;
@@ -16,6 +17,7 @@ abstract public class ApplicationUser : IdentityUser
 
     [Required]
     [DataType(DataType.Date)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     [DisplayFormat(DataFormatString = "{0:MMMM dd, yyyy}")] // January 12, 2001
     public DateTime DateCreated { get; set; }
 
