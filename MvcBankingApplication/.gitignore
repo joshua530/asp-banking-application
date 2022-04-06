@@ -1,5 +1,6 @@
 # utils
 /routes
+/update_db.sh
 
 # sqlite files
 *.db
