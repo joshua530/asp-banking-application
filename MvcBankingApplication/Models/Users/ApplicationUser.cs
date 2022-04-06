@@ -14,6 +14,8 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; } = String.Empty;
 
+    public string ImageUrl { get; set; } = "/images/users/avatar.png";
+
     public string FullName
     {
         get
