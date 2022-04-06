@@ -39,6 +39,20 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.Use(async (context, next) =>
+{
+    await next();
+    if (context.Response.StatusCode == 404)
+    {
+        context.Request.Path = "/404";
+        await next();
+    }
+    else if (context.Response.StatusCode == 403)
+    {
+        context.Request.Path = "/403";
+        await next();
+    }
+});
 
 app.UseRouting();
 app.UseAuthentication();
