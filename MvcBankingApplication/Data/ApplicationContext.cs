@@ -17,6 +17,16 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     {
     }
 
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        // set default image value
+        builder.Entity<ApplicationUser>()
+                .Property(b => b.ImageUrl)
+                .HasDefaultValue("/images/users/avatar.png");
+
+        base.OnModelCreating(builder);
+    }
+
     public DbSet<MvcBankingApplication.Models.Users.Customer> Customers { get; set; }
 
     public DbSet<MvcBankingApplication.Models.Transactions.Transaction> Transactions { get; set; }
