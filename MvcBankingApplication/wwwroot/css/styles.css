@@ -115,7 +115,9 @@ footer * {
 
 .navbar-pic {
   border-radius: 50%;
-  height: 45px;
+  border: 1px solid #fff !important;
+  height: 40px;
+  padding: 4px;
 }
 
 .dropdown-menu {
