@@ -9,8 +9,14 @@ var connectionString = builder.Configuration.GetConnectionString("ApplicationCon
 
 builder.Services.AddDbContext<ApplicationContext>(options =>
     options.UseSqlite(connectionString));
-builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services
+    .AddDefaultIdentity<ApplicationUser>(
+        options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
+    .AddRoleManager<RoleManager<IdentityRole>>()
+    .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationContext>();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
