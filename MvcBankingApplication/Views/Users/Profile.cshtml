@@ -1,0 +1,26 @@
+@model MvcBankingApplication.Models.ViewModels.Profile
+
+@{
+  ViewData["Title"] = Model.FullName;
+}
+
+<div class="bg-dark py-5 text-white">
+  <div class="container">
+    <div class="row row-cols-1 row-cols-sm-2">
+      <img src="@Model.ImageUrl" alt="@Model.UserName" class="col rounded me-sm-3 profile-img mb-2 mb-sm-0">
+      <div class="col">
+        <p class="mt-2 mt-sm-0 h3 text-light">Name: @Model.FullName</p>
+        <p class="mt-2 mt-sm-0 h3 text-light">Email: @Model.Email</p>
+        <p class="h3 text-light">Joined on: @Html.DisplayFor(model => model.DateCreated)</p>
+      </div>
+    </div>
+    <div>
+      @if (Model.IsProfileOwner)
+      {
+
+        <a asp-page="/Account/Manage/Index" asp-area="Identity" class="site-link d-block mb-2 mt-sm-3">edit profile</a>
+        <a asp-page="/Account/Manage/ChangePassword" asp-area="Identity" class="site-link">change password</a>
+      }
+    </div>
+  </div>
+</div>
