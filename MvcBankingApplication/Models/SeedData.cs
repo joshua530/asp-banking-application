@@ -47,7 +47,8 @@ public class SeedData
                 TransactionLimit = 10000,
                 StaffId = "JD343434",
                 Email = "johndoe@email.com",
-                UserName = "johndoe"
+                UserName = "johndoe",
+                EmailConfirmed = true
             };
             await userManager.CreateAsync(cashier, "abcdef*A2");
             await userManager.AddToRoleAsync(cashier, "cashier");
@@ -59,7 +60,8 @@ public class SeedData
                 StaffId = "AD43",
                 Email = "alicedoe@email.com",
                 UserName = "alicedoe",
-                IsAdmin = true
+                IsAdmin = true,
+                EmailConfirmed = true
             };
             await userManager.CreateAsync(admin, "abcdef*A2");
             await userManager.AddToRoleAsync(admin, "admin");
@@ -70,6 +72,7 @@ public class SeedData
                 LastName = "Doe",
                 UserName = "janedoe",
                 Email = "janedoe@email.com",
+                EmailConfirmed = true
             };
             await userManager.CreateAsync(customer, "abcdef*A2");
             await userManager.AddToRoleAsync(customer, "customer");
