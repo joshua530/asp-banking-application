@@ -14,6 +14,11 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; } = String.Empty;
 
+    [Required]
+    [DataType(DataType.Date)]
+    [DisplayFormat(DataFormatString = "{0:MMMM dd, yyyy}")] // January 12, 2001
+    public DateTime DateCreated { get; set; }
+
     public string ImageUrl { get; set; }
 
     public string FullName
