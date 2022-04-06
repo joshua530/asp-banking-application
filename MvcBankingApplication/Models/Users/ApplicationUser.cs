@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 
 namespace MvcBankingApplication.Models.Users;
 
 abstract public class ApplicationUser : IdentityUser
 {
+    private DateTime _dateCreated = DateTime.Now;
+
     [Required]
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string FirstName { get; set; }
@@ -15,10 +15,19 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; }
 
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [DataType(DataType.Date)]
     [DisplayFormat(DataFormatString = "{0:MMMM dd, yyyy}")] // January 12, 2001
-    public DateTime DateCreated { get; set; }
+    public DateTime DateCreated
+    {
+        get
+        {
+            return _dateCreated;
+        }
+        set
+        {
+            _dateCreated = value;
+        }
+    }
 
     public string ImageUrl { get; set; }
 
