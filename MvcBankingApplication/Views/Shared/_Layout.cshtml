@@ -12,10 +12,19 @@
   <link rel="stylesheet" href="~/css/styles.css" asp-append-version="true" />
 </head>
 <body>
-  <nav class="navbar px-2 sticky-top">
+
+  <nav class="navbar px-2 navbar-expand-lg navbar-dark sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand text-white text-bolder" href="/">YourBank</a>
-      <partial name="_LoginPartial" />
+      <a class="navbar-brand text-white text-bolder" asp-controller="Home" asp-action="Index">YourBank</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse me-auto" id="navbarSupportedContent">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <partial name="_LoginPartial" />
+        </ul>
+      </div>
     </div>
   </nav>
 

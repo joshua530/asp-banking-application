@@ -5,23 +5,42 @@
 @inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
-    @if (SignInManager.IsSignedIn(User))
-    {
-        <div class="d-flex align-items-center flex-wrap">
-            <a id="manage" class="text-white me-3 me-sm-5 site-link" asp-area="Identity" asp-page="/Account/Manage/Index"
-            title="Manage">Hello @UserManager.GetUserName(User)!</a>
-
-            <form id="logoutForm" class="d-inline" asp-area="Identity" asp-page="/Account/Logout"
-            asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-                <button id="logout" type="submit" class="btn text-white site-link">Logout</button>
-            </form>
-        </div>
-    }
-    else
-    {
-        <div>
-            <a asp-area="Identity" asp-page="/Account/Register" class="text-white me-3 me-sm-5 site-link">Sign up</a>
-            <a asp-area="Identity" asp-page="/Account/Login" class="text-white me-3 me-sm-5 site-link">Login</a>
-        </div>
-    }
+  @if (SignInManager.IsSignedIn(User))
+  {
+    <li class="nav-item pe-3">
+      <a class="nav-link text-white" href="#" title="You have 3 notifications">
+        <i class="fa-solid fa-bell fa-2x"></i>
+        <sup>3</sup>
+      </a>
+    </li>
+    <li class="nav-item dropdown">
+      <a title="@UserManager.GetUserName(User)" class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+      role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <img src="/images/10.jpg" class="navbar-pic" alt="@UserManager.GetUserName(User)'s-image">
+      </a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item text-white me-3 me-sm-5" asp-area="Identity"
+          asp-page="/Account/Manage/Index">Profile</a></li>
+        <li><a class="dropdown-item" href="#">My account</a></li>
+        <li>
+          <hr class="dropdown-divider">
+        </li>
+        <li>
+          <form style="padding: 0 0.2em;" id="logoutForm" class="dropdown-item form-inline" asp-area="Identity"
+          asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button id="logout" type="submit" class="btn text-white">Logout</button>
+          </form>
+        </li>
+      </ul>
+    </li>
+  }
+  else
+  {
+    <li class="nav-item">
+      <a asp-area="Identity" asp-page="/Account/Register" class="text-white me-3 me-sm-5 site-link">Sign up</a>
+    </li>
+    <li class="nav-item">
+      <a asp-area="Identity" asp-page="/Account/Login" class="text-white me-3 me-sm-5 site-link">Login</a>
+    </li>
+  }
 </ul>
