@@ -21,8 +21,11 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     {
         // set default image value
         builder.Entity<ApplicationUser>()
-                .Property(b => b.ImageUrl)
+                .Property(e => e.ImageUrl)
                 .HasDefaultValue("/images/users/avatar.png");
+        builder.Entity<ApplicationUser>()
+                .Property(e => e.DateCreated)
+                .HasDefaultValue(DateTime.Now);
 
         base.OnModelCreating(builder);
     }
