@@ -15,7 +15,6 @@ abstract public class ApplicationUser : IdentityUser
     [RegularExpression(@"[a-zA-Z]{2,10}")]
     public string LastName { get; set; } = String.Empty;
 
-    [Required]
     [DataType(DataType.Date)]
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     [DisplayFormat(DataFormatString = "{0:MMMM dd, yyyy}")] // January 12, 2001
