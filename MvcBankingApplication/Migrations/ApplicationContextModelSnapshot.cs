@@ -291,7 +291,7 @@ namespace MvcBankingApplication.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateCreated")
-                        .ValueGeneratedOnAddOrUpdate()
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Discriminator")
