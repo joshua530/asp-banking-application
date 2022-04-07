@@ -177,3 +177,12 @@ input[type='number'] {
 .profile-edit-form {
   max-width: 480px;
 }
+
+img {
+  object-fit: cover !important;
+}
+
+nav img,.form-img  {
+  height: 45px !important;
+  width: 45px !important;
+}
