@@ -5,3 +5,9 @@
 # sqlite files
 *.db
 ApplicationContext-*
+
+# uploaded images
+wwwroot/**/users/*.png
+wwwroot/**/users/*.jpg
+# don't delete default image
+!wwwroot/**/users/avatar.png
