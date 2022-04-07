@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MvcBankingApplication.Models.Users;
+using Myrmec;
 
 namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
 {
@@ -15,18 +16,22 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _webHostEnv;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager)
+            SignInManager<ApplicationUser> signInManager,
+            IConfiguration config,
+            IWebHostEnvironment webHostEnv)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _config = config;
+            _webHostEnv = webHostEnv;
         }
 
         public string ImageUrl { get; set; }
-
-        // TODO Image
 
         [TempData]
         public string StatusMessage { get; set; }
@@ -49,6 +54,8 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
             [Required]
             [Display(Name = "last name")]
             public string LastName { get; set; }
+            [Display(Name = "user image")]
+            public IFormFile UserImage { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -129,10 +136,66 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
                     user.UserName = Input.UserName;
                 }
             }
+
+            ImageUrl = user.ImageUrl;
+
             if (errorsExist)
             {
-                ImageUrl = user.ImageUrl;
                 return Page();
+            }
+
+            if (Input.UserImage != null && Input.UserImage.Length > 0)
+            {
+                // reject invalid image files
+                string imgType = ValidateImage(Input.UserImage);
+                if (imgType == null)
+                {
+                    ModelState.AddModelError("Input.UserImage", "file uploaded is not a valid image. only jpg and png images are allowed");
+                    return Page();
+                }
+
+                using (var memStream = new MemoryStream())
+                {
+                    await Input.UserImage.CopyToAsync(memStream);
+
+                    // reject files > 2MB
+                    if (memStream.Length < 2097152)
+                    {
+
+                        var wwwRoot = _webHostEnv.WebRootPath;
+                        var userImgPath =
+                            Path.Join(_config["Files:UserImagesRoot"],
+                            Path.GetRandomFileName());
+
+                        if (imgType == "jpg" || imgType == "jpeg")
+                        {
+                            userImgPath += ".jpg";
+                        }
+                        else
+                        {
+                            userImgPath += ".png";
+                        }
+
+                        var pathToSave = Path.Join(wwwRoot, userImgPath);
+
+                        using (var stream = System.IO.File.Create(pathToSave))
+                        {
+                            await Input.UserImage.CopyToAsync(stream);
+
+                            // delete previous image
+                            if (user.ImageUrl != "/images/users/avatar.png")
+                            {
+                                string toDelete = Path.Join(wwwRoot, user.ImageUrl);
+                                System.IO.File.Delete(toDelete);
+                            }
+                            user.ImageUrl = userImgPath;
+                        }
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Input.UserImage", "uploaded file is too large");
+                    }
+                }
             }
 
             await _userManager.UpdateAsync(user);
@@ -140,6 +203,57 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
+        }
+
+        /// <returns>
+        /// array of 20 bytes containing file head data
+        /// </returns>
+        private static byte[] ReadFileHead(IFormFile file)
+        {
+            using (var fs = new BinaryReader(file.OpenReadStream()))
+            {
+                byte[] head = new byte[20];
+                fs.Read(head, 0, 20);
+                return head;
+            }
+        }
+
+        /// <summary>
+        /// sniffs file head to ensure it is a valid image.
+        /// 
+        /// <para>Supported file types:</para>
+        /// <list type="bullet">
+        /// <item>
+        /// <description>jpg,jpeg (image/jpeg)</description>
+        /// </item>
+        /// <item>
+        /// <description>png (image/png)</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <returns>
+        /// the image type found if image is valid, else null
+        /// </returns>
+        private static string ValidateImage(IFormFile file)
+        {
+            Sniffer sniffer = new Sniffer();
+            var validFiles = new List<Record>
+            {
+                new Record("jpg,jpeg", "ff,d8,ff,db"),
+                new Record("jpg,jpeg", "FF,D8,FF,DB"),
+                new Record("jpg,jpeg", "FF,D8,FF,E0,00,10,4A,46,49,46,00,01"),
+                new Record("jpg,jpeg", "FF,D8,FF,EE"),
+                new Record("jpg,jpeg", "FF,D8,FF,E1,??,??,45,78,69,66,00,00"),
+                new Record("png", "89,50,4e,47,0d,0a,1a,0a")
+            };
+            sniffer.Populate(validFiles);
+            byte[] fileHead = ReadFileHead(file);
+            var results = sniffer.Match(fileHead);
+            if (results.Count > 0)
+            {
+                return results[0];
+            }
+            return null;
         }
     }
 }
