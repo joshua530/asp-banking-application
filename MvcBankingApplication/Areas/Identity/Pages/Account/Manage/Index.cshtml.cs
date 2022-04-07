@@ -36,15 +36,17 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
 
         public class InputModel
         {
+            [Required]
             [Display(Name = "username")]
             public string UserName { get; set; }
+            [Required]
             [EmailAddress]
             [Display(Name = "email")]
             public string Email { get; set; }
-
+            [Required]
             [Display(Name = "first name")]
             public string FirstName { get; set; }
-
+            [Required]
             [Display(Name = "last name")]
             public string LastName { get; set; }
         }
@@ -90,16 +92,50 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account.Manage
                 return Page();
             }
 
-            // var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            // if (Input.PhoneNumber != phoneNumber)
-            // {
-            //     var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            //     if (!setPhoneResult.Succeeded)
-            //     {
-            //         StatusMessage = "Unexpected error when trying to set phone number.";
-            //         return RedirectToPage();
-            //     }
-            // }
+            if (Input.FirstName != user.FirstName)
+            {
+                user.FirstName = Input.FirstName;
+            }
+            if (Input.LastName != user.LastName)
+            {
+                user.LastName = Input.LastName;
+            }
+            bool errorsExist = false;
+            if (Input.Email != user.Email)
+            {
+                // email should be unique
+                var userWithEmail = await _userManager.FindByEmailAsync(Input.Email);
+                if (userWithEmail != null)
+                {
+                    ModelState.AddModelError("Input.Email", "that email is already in use, try another one");
+                    errorsExist = true;
+                }
+                else
+                {
+                    user.Email = Input.Email;
+                }
+            }
+            if (Input.UserName != user.UserName)
+            {
+                // username should be unique
+                var userWithUsername = await _userManager.FindByNameAsync(Input.UserName);
+                if (userWithUsername != null)
+                {
+                    ModelState.AddModelError("Input.UserName", "that username is already in use, try another one");
+                    errorsExist = true;
+                }
+                else
+                {
+                    user.UserName = Input.UserName;
+                }
+            }
+            if (errorsExist)
+            {
+                ImageUrl = user.ImageUrl;
+                return Page();
+            }
+
+            await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
