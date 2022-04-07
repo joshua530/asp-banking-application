@@ -11,3 +11,6 @@ wwwroot/**/users/*.png
 wwwroot/**/users/*.jpg
 # don't delete default image
 !wwwroot/**/users/avatar.png
+
+# scaffolding files
+ScaffoldingReadMe.txt
