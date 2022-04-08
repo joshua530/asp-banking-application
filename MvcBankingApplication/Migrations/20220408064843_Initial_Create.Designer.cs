@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MvcBankingApplication.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20220406082158_UpdateImageUrl")]
-    partial class UpdateImageUrl
+    [Migration("20220408064843_Initial_Create")]
+    partial class Initial_Create
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -152,11 +152,8 @@ namespace MvcBankingApplication.Migrations
 
             modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankCashAccount", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Balance")
@@ -165,18 +162,15 @@ namespace MvcBankingApplication.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.ToTable("BankCashAccount");
                 });
 
             modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankOverdraftAccount", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Balance")
@@ -185,18 +179,15 @@ namespace MvcBankingApplication.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.ToTable("BankOverdraftAccount");
                 });
 
             modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("AccountNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<double>("Balance")
@@ -211,7 +202,10 @@ namespace MvcBankingApplication.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId")
+                        .IsUnique();
 
                     b.ToTable("CustomerAccounts");
                 });
@@ -290,6 +284,9 @@ namespace MvcBankingApplication.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("DateCreated")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Discriminator")
@@ -400,14 +397,6 @@ namespace MvcBankingApplication.Migrations
                 {
                     b.HasBaseType("MvcBankingApplication.Models.Users.ApplicationUser");
 
-                    b.Property<int?>("AccountID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CustomerAccountId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasIndex("AccountID");
-
                     b.HasDiscriminator().HasValue("Customer");
                 });
 
@@ -462,6 +451,15 @@ namespace MvcBankingApplication.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
+                {
+                    b.HasOne("MvcBankingApplication.Models.Users.Customer", "Customer")
+                        .WithOne("Account")
+                        .HasForeignKey("MvcBankingApplication.Models.Accounts.CustomerAccount", "CustomerId");
+
+                    b.Navigation("Customer");
+                });
+
             modelBuilder.Entity("MvcBankingApplication.Models.Notifications.Notification", b =>
                 {
                     b.HasOne("MvcBankingApplication.Models.Users.ApplicationUser", "Owner")
@@ -494,10 +492,6 @@ namespace MvcBankingApplication.Migrations
 
             modelBuilder.Entity("MvcBankingApplication.Models.Users.Customer", b =>
                 {
-                    b.HasOne("MvcBankingApplication.Models.Accounts.CustomerAccount", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountID");
-
                     b.Navigation("Account");
                 });
 #pragma warning restore 612, 618
