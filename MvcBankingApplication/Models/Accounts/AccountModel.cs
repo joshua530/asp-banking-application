@@ -8,8 +8,6 @@ namespace MvcBankingApplication.Models.Accounts
         private double _balance = 0;
         private AccountType _accountType = AccountType.CustomerAccount;
 
-        private string _accountId = null;
-
         [Key]
         [Required]
         public int Id
