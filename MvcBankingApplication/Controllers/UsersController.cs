@@ -52,5 +52,20 @@ public class UsersController : Controller
 
         return View(profile);
     }
+
+    public IActionResult CustomerHome()
+    {
+        return View();
+    }
+
+    public IActionResult CashierHome()
+    {
+        return View();
+    }
+
+    public IActionResult AdminHome()
+    {
+        return View();
+    }
 }
 #pragma warning restore CS8632
