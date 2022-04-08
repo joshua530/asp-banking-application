@@ -95,16 +95,34 @@ namespace MvcBankingApplication.Areas.Identity.Pages.Account
         public void OnGet(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            // ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
+
+                var userWithEmail = await _userManager.FindByEmailAsync(Input.Email);
+                bool duplicateValues = false;
+                if (userWithEmail != null)
+                {
+                    ModelState.AddModelError("Input.Email", "that email has already been taken. try another one");
+                    duplicateValues = true;
+                }
+
+                var userWithUsername = await _userManager.FindByNameAsync(Input.UserName);
+                if (userWithUsername != null)
+                {
+                    ModelState.AddModelError("Input.UserName", "that username has already been taken. try another one");
+                    duplicateValues = true;
+                }
+
+                if (duplicateValues)
+                {
+                    return Page();
+                }
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
