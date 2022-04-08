@@ -1,18 +1,45 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MvcBankingApplication.Models.Accounts
 {
     abstract public class AccountModel
     {
-        public int ID { get; set; }
+        private double _balance = 0;
+        private AccountType _accountType = AccountType.CustomerAccount;
+
+        private string _accountId = null;
+
+        [Key]
         [Required]
-        public int AccountNumber { get; set; }
+        public int Id
+        { get; set; }
 
         [Required]
-        [EnumDataType(typeof(AccountType))]
-        public int Type { get; set; } = 1;
+        public AccountType Type
+        {
+            get
+            {
+                return _accountType;
+            }
+            set
+            {
+                _accountType = value;
+            }
+        }
 
-        public double Balance { get; set; } = 0;
+        [Required]
+        [DataType(DataType.Currency)]
+        public double Balance
+        {
+            get { return _balance; }
+            set { _balance = value; }
+        }
+
+        public override string ToString()
+        {
+            return $"{Id}-{Balance}-{Type}";
+        }
     }
 
     public enum AccountType
