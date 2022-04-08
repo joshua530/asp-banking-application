@@ -1,11 +1,13 @@
 using MvcBankingApplication.Models.Users;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace MvcBankingApplication.Models.Accounts
 {
     public class CustomerAccount : AccountModel
     {
-        public double OverdraftLimit { get; set; } = 0;
+        [DataType(DataType.Currency)]
+        public double OverdraftLimit { get; set; } = 1000;
 
         [ForeignKey("Customer")]
         public string CustomerId { get; set; }
