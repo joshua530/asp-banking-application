@@ -9,5 +9,7 @@ namespace MvcBankingApplication.Models.Accounts
 
         [ForeignKey("Customer")]
         public string CustomerId { get; set; }
+
+        public virtual Customer Customer { get; set; }
     }
 }
