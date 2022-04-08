@@ -77,6 +77,28 @@ public class SeedData
             await userManager.CreateAsync(customer, "abcdef*A2");
             await userManager.AddToRoleAsync(customer, "customer");
 
+            //########### accounts #################
+            context.CustomerAccounts.Add(
+                new Accounts.CustomerAccount
+                {
+                    OverdraftLimit = 1000,
+                    Balance = 20000,
+                    CustomerId = customer.Id
+                });
+
+            context.BankCashAccount.Add(
+                new Accounts.BankCashAccount
+                {
+                    Type = Accounts.AccountType.BankCashAccount,
+                    Balance = 1000000000
+                });
+
+            context.BankOverdraftAccount.Add(
+                new Accounts.BankOverdraftAccount
+                {
+                    Type = Accounts.AccountType.BankOverdraftAccount,
+                    Balance = 2000000000
+                });
 
             //########### notifications #################
             context.Notifications.Add(
@@ -106,39 +128,6 @@ public class SeedData
                     ApplicationUserId = customer.Id,
                     Message = "You overdraft request id <b>kn7sdfnk</b> has been approved, check your account to confirm that the transaction succeeded",
                     Type = (int)Notifications.NotificationTypes.SUCCESS
-                }
-            );
-
-            //########### accounts #################
-            context.CustomerAccounts.Add(
-                new Accounts.CustomerAccount
-                {
-                    OverdraftLimit = 1000,
-                    ID = 1,
-                    CustomerId = customer.Id,
-                    Type = (int)Accounts.AccountType.CustomerAccount,
-                    AccountNumber = 123,
-                    Balance = 20000
-                }
-            );
-
-            context.BankCashAccount.Add(
-                new Accounts.BankCashAccount
-                {
-                    ID = 2,
-                    Type = (int)Accounts.AccountType.BankCashAccount,
-                    AccountNumber = 10001,
-                    Balance = 1000000000
-                }
-            );
-
-            context.BankOverdraftAccount.Add(
-                new Accounts.BankOverdraftAccount
-                {
-                    ID = 3,
-                    Type = (int)Accounts.AccountType.BankOverdraftAccount,
-                    AccountNumber = 10002,
-                    Balance = 2000000000
                 }
             );
 
