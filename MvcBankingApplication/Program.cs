@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using MvcBankingApplication.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("ApplicationContext");
@@ -20,6 +22,10 @@ builder.Services
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// email verification
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
+
 var app = builder.Build();
 
 // seed data
@@ -28,6 +34,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     SeedData.Initialize(services).GetAwaiter().GetResult();
 }
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
