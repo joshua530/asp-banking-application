@@ -53,6 +53,7 @@ public class UsersController : Controller
         return View(profile);
     }
 
+    [Authorize(Roles = "customer")]
     public IActionResult CustomerHome()
     {
         return View();
