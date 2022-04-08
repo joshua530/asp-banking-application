@@ -45,7 +45,6 @@ public class SeedData
                 FirstName = "John",
                 LastName = "Doe",
                 TransactionLimit = 10000,
-                StaffId = "JD343434",
                 Email = "johndoe@email.com",
                 UserName = "johndoe",
                 EmailConfirmed = true
@@ -57,10 +56,8 @@ public class SeedData
             {
                 FirstName = "Alice",
                 LastName = "Doe",
-                StaffId = "AD43",
                 Email = "alicedoe@email.com",
                 UserName = "alicedoe",
-                IsAdmin = true,
                 EmailConfirmed = true
             };
             await userManager.CreateAsync(admin, "abcdef*A2");
