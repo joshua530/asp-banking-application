@@ -1,12 +1,12 @@
-@model MvcBankingApplication.Models.Users.Customer
+@model MvcBankingApplication.Models.ViewModels.CustomerHomeModel
 
 @{
-  ViewData["Title"] = "Home";
+  ViewData["Title"] = "Home Page";
 }
 
 <div class="bg-dark py-3">
   <div class="container text-white">
-    <p>Hello {username}, below is a list of services you can access</p>
+    <p>Hello <b>@Model.Name</b>, below is a list of services you can access</p>
     <section class="my-5">
       <h2>Make transaction</h2>
       <ul>
