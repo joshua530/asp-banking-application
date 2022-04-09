@@ -6,7 +6,7 @@
 
 <div class="bg-dark py-3">
   <div class="container text-white">
-    <p>Hello <b>@Model.Name</b>, below is a list of services you can access</p>
+    <p>Hello <b>@Model.User.FullName</b>, below is a list of services you can access</p>
     <section class="my-5">
       <h2>Make transaction</h2>
       <ul>
@@ -56,78 +56,45 @@
     <section class="my-5">
       <h3>Account Summary</h3>
       <ul>
-        <li>Balance: $20000</li>
-        <li>Account number: 32323423</li>
-        <li>Date opened: 22 march 2019</li>
-        <li>Last transaction date: 18 Nov 2021</li>
+        <li>Balance: @Model.Account.Balance</li>
+        <li>Account number: @Model.Account.Id</li>
+        <li>Date opened: @Html.DisplayFor(m => m.User.DateCreated)</li>
       </ul>
     </section>
     <hr>
     <section class="my-5 container">
       <h2 class="mb-3">Stock quotes</h2>
       <div class="row">
-        <div class="border rounded p-2 col-6 col-sm-3 col-lg-2 m-1">
-          <div>
-            <h5>Abc inc</h5>
+        @foreach (var Stock in Model.Stocks)
+        {
+          var textClass = "";
+          var faClass = "fa-regular fa-dash";
+          if (Stock.PriceChange == "up")
+          {
+            textClass = "text-green";
+            faClass = "fa-solid fa-arrow-up";
+          }
+          else if (Stock.PriceChange == "down")
+          {
+            textClass = "text-red";
+            faClass = "fa-solid fa-arrow-down";
+          }
+
+          <div class="border rounded p-2 col-11 col-sm-3 col-lg-2 m-1">
+            <div>
+              <h5>@Stock.Symbol</h5>
+            </div>
+            <div class="d-flex flex-wrap">
+              <p class="me-3">$@Stock.Price</p>
+              <p class="@textClass">
+                <i class="@faClass"></i>
+                @Stock.PercentChange
+              </p>
+            </div>
           </div>
-          <div class="d-flex">
-            <p class="me-3">$10</p>
-            <p class="text-red">
-              <i class="fa-solid fa-arrow-down"></i>
-              6%
-            </p>
-          </div>
-        </div>
-        <div class="border rounded p-2 col-6 col-sm-3 col-lg-2 m-1">
-          <div>
-            <h5>Abc inc</h5>
-          </div>
-          <div class="d-flex">
-            <p class="me-3">$20</p>
-            <p class="text-green">
-              <i class="fas fa-arrow-up"></i>
-              2%
-            </p>
-          </div>
-        </div>
-        <div class="border rounded p-2 col-6 col-sm-3 col-lg-2 m-1">
-          <div>
-            <h5>Abc inc</h5>
-          </div>
-          <div class="d-flex">
-            <p class="me-3">$40</p>
-            <p class="text-green">
-              <i class="fas fa-arrow-up"></i>
-              5%
-            </p>
-          </div>
-        </div>
-        <div class="border rounded p-2 col-6 col-sm-3 col-lg-2 m-1">
-          <div>
-            <h5>Abc inc</h5>
-          </div>
-          <div class="d-flex">
-            <p class="me-3">$20</p>
-            <p class="text-green">
-              <i class="fas fa-arrow-up"></i>
-              2%
-            </p>
-          </div>
-        </div>
-        <div class="border rounded p-2 col-6 col-sm-3 col-lg-2 m-1">
-          <div>
-            <h5>Abc inc</h5>
-          </div>
-          <div class="d-flex">
-            <p class="me-3">$30</p>
-            <p class="text-red">
-              <i class="fa-solid fa-arrow-down"></i>
-              4%
-            </p>
-          </div>
-        </div>
+        }
       </div>
-      <a href="#" class="site-link d-block mt-3">view more stocks</a>
+      <a target="_blank" href="@Model.StockMarketLink" class="site-link d-block mt-3">view more stocks</a>
     </section>
   </div>
 </div>
