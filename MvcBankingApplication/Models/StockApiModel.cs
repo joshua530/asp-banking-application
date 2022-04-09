@@ -1,14 +1,13 @@
 using MvcBankingApplication.Services.Stocks;
-using MvcBankingApplication.Utils;
 
-namespace MvcBankingApplication.Models.StockApiModel
+namespace MvcBankingApplication.Models
 {
 
     public class StockApiModel
     {
         public StockApiService StockApi = new StockApiService();
 
-        public StockObj[] GetStocks()
+        public StockModel[] GetStocks()
         {
             return StockApi.Stocks;
         }
