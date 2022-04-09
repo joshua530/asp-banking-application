@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using MvcBankingApplication.Models;
 
 namespace MvcBankingApplication.Utils
 {
@@ -6,7 +7,7 @@ namespace MvcBankingApplication.Utils
     class ApiRequests
     {
         public static HttpClient client = new HttpClient();
-        public static async Task<StockObj> GetStockData(string symbol)
+        public static async Task<StockModel> GetStockData(string symbol)
         {
             String uri = $"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol}&apikey=JZNAORST2Q2AQGQ9";
 
@@ -21,7 +22,7 @@ namespace MvcBankingApplication.Utils
                 response.EnsureSuccessStatusCode();
                 String result = await response.Content.ReadAsStringAsync();
                 JObject jsonObj = JObject.Parse(result);
-                StockObj stock = new StockObj();
+                StockModel stock = new StockModel();
                 if (jsonObj.ContainsKey("Global Quote"))
                 {
                     stock.Symbol = jsonObj["Global Quote"]["01. symbol"].ToString();
@@ -32,9 +33,9 @@ namespace MvcBankingApplication.Utils
             }
         }
 
-        public static StockObj[] GetDataForStocks(string[] stockSymbols)
+        public static StockModel[] GetDataForStocks(string[] stockSymbols)
         {
-            List<StockObj> stocks = new List<StockObj>();
+            List<StockModel> stocks = new List<StockModel>();
             int[] randIndices = RandomNums(0, stockSymbols.Length - 1, 5);
 
             foreach (int s in randIndices)
