@@ -57,7 +57,7 @@
       <h3>Account Summary</h3>
       <ul>
         <li>Balance: @Model.Account.Balance</li>
-        <li>Account number: @Model.Account.Id</li>
+        <li>Account number: @Html.DisplayFor(m => m.Account.Id)</li>
         <li>Date opened: @Html.DisplayFor(m => m.User.DateCreated)</li>
       </ul>
     </section>

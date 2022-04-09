@@ -10,6 +10,7 @@ namespace MvcBankingApplication.Models.Accounts
 
         [Key]
         [Required]
+        [DisplayFormat(DataFormatString = "{0:D5}")]
         public int Id
         { get; set; }
 
