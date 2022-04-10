@@ -74,6 +74,17 @@ public class SeedData
             await userManager.CreateAsync(customer, "abcdef*A2");
             await userManager.AddToRoleAsync(customer, "customer");
 
+            var customer2 = new Users.Customer
+            {
+                FirstName = "Alice",
+                LastName = "Doe",
+                UserName = "alicedoe",
+                Email = "alicedoe@email.com",
+                EmailConfirmed = true
+            };
+            await userManager.CreateAsync(customer2, "abcdef*A2");
+            await userManager.AddToRoleAsync(customer2, "customer");
+
             //########### accounts #################
             context.CustomerAccounts.Add(
                 new Accounts.CustomerAccount
