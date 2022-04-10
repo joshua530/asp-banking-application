@@ -1,0 +1,41 @@
+@model MvcBankingApplication.Models.WireTransferModel
+
+@{
+  ViewData["Title"] = "Wire Transfer";
+  List<string> errors;
+  if (ViewData["FatalErrors"] != null)
+    errors = (List<string>)ViewData["FatalErrors"];
+  else
+    errors = new List<string>();
+}
+
+<div class="bg-dark">
+  <div class="text-white container py-5">
+    <h2 class="mb-3">Overdraft</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <form method="post">
+          <ul>
+            @foreach (var err in errors)
+            {
+              <li class="text-red">@err</li>
+            }
+          </ul>
+          <div class="form-group mb-4">
+            <label class="form-label" asp-for="Amount"></label>
+            <input asp-for="Amount" placeholder="Amount to transfer" type="number" class="form-control"
+              aria-required="true" />
+            <span asp-validation-for="Amount" class="text-red"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" asp-for="AccountNumber"></label>
+            <input placeholder="Enter account number" asp-for="AccountNumber" class="form-control"
+              aria-required="true" />
+            <span asp-validation-for="AccountNumber" class="text-red"></span>
+          </div>
+          <button type="submit" class="w-100 btn btn-blue mt-3 rounded-0">Request Wire Transfer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -17,6 +17,7 @@ using MvcBankingApplication.Models.Transactions;
 
 namespace MvcBankingApplication.Controllers
 {
+    [Authorize(Roles = "customer")]
     public class CustomersController : Controller
     {
         private readonly ApplicationContext _context;
@@ -28,7 +29,6 @@ namespace MvcBankingApplication.Controllers
             _userManager = userManager;
         }
 
-        [Authorize(Roles = "customer")]
         public async Task<IActionResult> Index(int page = default)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -57,6 +57,96 @@ namespace MvcBankingApplication.Controllers
             };
 
             return View(homeModel);
+        }
+
+        public IActionResult WireTransfer()
+        {
+            var model = new WireTransferModel();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> WireTransfer(WireTransferModel model)
+        {
+            var accountQuery = from cust_ac in _context.CustomerAccounts
+                               where cust_ac.Id == model.AccountNumber
+                               select cust_ac;
+            var accountToSendToList = await accountQuery.ToArrayAsync();
+
+            var fatalErrors = new List<string>();
+            ViewData["FatalErrors"] = fatalErrors;
+
+            if (accountToSendToList.Length == 0)
+            {
+                ModelState.AddModelError("AccountNumber", "no account with that account number exists");
+            }
+
+            if (!ModelState.IsValid || fatalErrors.Count > 0)
+            {
+                return View(model);
+            }
+
+            var userId = _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
+            var toWithdrawFromQuery = from cust_ac in _context.CustomerAccounts
+                                      where cust_ac.CustomerId == userId
+                                      select cust_ac;
+            var toWithdrawFromList = await toWithdrawFromQuery.ToArrayAsync();
+            if (toWithdrawFromList.Length == 0 || toWithdrawFromList.Length > 1)
+            {
+                fatalErrors.Add("Error occured. Our technical team has been notified. If this error persists, contact customer service.");
+                return View(model);
+            }
+
+            CustomerAccount toWithdrawFrom = toWithdrawFromList[0];
+            CustomerAccount toSendTo = accountToSendToList[0];
+
+            if (toWithdrawFrom.Id == toSendTo.Id)
+            {
+                fatalErrors.Add("Invalid transaction. You cannot transfer money to yourself");
+                return View(model);
+            }
+
+            // perform the transaction
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // credit
+                    if (toWithdrawFrom.Balance < model.Amount)
+                    {
+                        fatalErrors.Add("The amount requested exceeds your account balance");
+                        return View(model);
+                    }
+                    toWithdrawFrom.Balance -= model.Amount;
+                    // debit
+                    toSendTo.Balance += model.Amount;
+                    // record transaction
+                    Transaction tr = new Transaction
+                    {
+                        Amount = model.Amount,
+                        TransactionType = TransactionTypes.WIRE_TRANSFER,
+                        CustomerId = userId,
+                        AccountDebitedId = toSendTo.Id,
+                        AccountCreditedId = toWithdrawFrom.Id
+                    };
+                    // commit
+                    _context.CustomerAccounts.Update(toWithdrawFrom);
+                    _context.CustomerAccounts.Update(toSendTo);
+                    _context.Transactions.Add(tr);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (OperationCanceledException)
+                {
+                    fatalErrors.Add("Transaction failed. Refresh page and try again. If the error persists, contact us.");
+                    return View(model);
+                }
+            }
+
+            // transaction succeeded
+            TempData["Message"] = "Transaction posted successfully";
+            return RedirectToAction("", "Customers");
         }
     }
 }
