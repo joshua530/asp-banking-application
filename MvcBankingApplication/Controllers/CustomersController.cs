@@ -12,6 +12,7 @@ using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models.Accounts;
 using Microsoft.AspNetCore.Authorization;
 using MvcBankingApplication.Models;
+using MvcBankingApplication.Models.Transactions;
 
 
 namespace MvcBankingApplication.Controllers
@@ -28,20 +29,31 @@ namespace MvcBankingApplication.Controllers
         }
 
         [Authorize(Roles = "customer")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = default)
         {
             var user = await _userManager.GetUserAsync(User);
             var customer = (Customer)user;
             IQueryable<CustomerAccount> query = from c_a in _context.CustomerAccounts
                                                 where c_a.CustomerId == customer.Id
                                                 select c_a;
+            CustomerAccount account = await query.FirstAsync();
+            if (page < 1)
+            {
+                page = 1;
+            }
+            int pageSize = 5;
+            IQueryable<Transaction> trxQuery = from tr in _context.Transactions.Skip((page - 1) * pageSize).Take(pageSize)
+                                               where tr.AccountCreditedId == account.Id ||
+                                               tr.AccountDebitedId == account.Id
+                                               select tr;
             var stockApi = new StockApiModel();
 
             var homeModel = new CustomerHomeModel
             {
                 User = customer,
-                Account = await query.FirstAsync(),
-                Stocks = stockApi.GetStocks()
+                Account = account,
+                Stocks = stockApi.GetStocks(),
+                Transactions = await trxQuery.ToListAsync()
             };
 
             return View(homeModel);
