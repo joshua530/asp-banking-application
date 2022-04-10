@@ -24,33 +24,40 @@
     <hr>
     <section class="my-5">
       <h2 colspan="3">Recent Transactions</h2>
-      <table class="table text-white">
-        <thead>
-          <tr>
-            <th scope="col">Date</th>
-            <th scope="col">Amount</th>
-            <th scope="col">Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>22 March 2021</td>
-            <td>2000</td>
-            <td class="text-green">DR</td>
-          </tr>
-          <tr>
-            <td>12 Apr 2020</td>
-            <td>10000</td>
-            <td class="text-red">CR</td>
-          </tr>
-          <tr>
-            <td>11 Apr 2020</td>
-            <td>200000</td>
-            <td class="text-green">DR</td>
-          </tr>
-        </tbody>
-      </table>
-      <a href="#" class="site-link d-block mt-4">view more transactions</a>
+      @if (Model.Transactions.Count() == 0)
+      {
+        <h3 class="text-lighter">There are currently no transactions to display</h3>
+      }
+      else
+      {
+        <table class="table text-white">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Amount</th>
+              <th scope="col">Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>22 March 2021</td>
+              <td>2000</td>
+              <td class="text-green">DR</td>
+            </tr>
+            <tr>
+              <td>12 Apr 2020</td>
+              <td>10000</td>
+              <td class="text-red">CR</td>
+            </tr>
+            <tr>
+              <td>11 Apr 2020</td>
+              <td>200000</td>
+              <td class="text-green">DR</td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="#" class="site-link d-block mt-4">view more transactions</a>
+      }
     </section>
     <hr>
     <section class="my-5">
