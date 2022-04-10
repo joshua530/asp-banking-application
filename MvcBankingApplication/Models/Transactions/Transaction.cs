@@ -8,7 +8,7 @@ namespace MvcBankingApplication.Models.Transactions
 #pragma warning disable CS8632
     public class Transaction
     {
-        private DateTime _timeOfTransaction = DateTime.MinValue;
+        private DateTime _timeOfTransaction = DateTime.Now;
         public int ID { get; set; }
         [Required]
         [DataType(DataType.DateTime), DisplayFormat(
@@ -19,8 +19,6 @@ namespace MvcBankingApplication.Models.Transactions
             get
             {
                 // create datetime for new object
-                if (_timeOfTransaction == DateTime.MinValue)
-                    _timeOfTransaction = DateTime.Now;
                 return _timeOfTransaction;
             }
             set
