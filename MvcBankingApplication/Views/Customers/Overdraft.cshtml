@@ -1,0 +1,43 @@
+@model MvcBankingApplication.Models.OverdraftModel
+
+@{
+  ViewData["Title"] = "Overdraft";
+  List<string> errors;
+  if (ViewData["FatalErrors"] != null)
+    errors = (List<string>)ViewData["FatalErrors"];
+  else
+    errors = new List<string>();
+}
+
+<div class="bg-dark">
+  <div class="text-white container py-5">
+    <h2 class="mb-3">Overdraft</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <form method="post">
+          <ul>
+            @foreach (var err in errors)
+            {
+              <li class="text-red">@err</li>
+            }
+          </ul>
+          <div class="form-group mb-4">
+            <label class="form-label" asp-for="Amount"></label>
+            <input asp-for="Amount" placeholder="Enter amount" class="form-control" aria-required="true" />
+            <span asp-validation-for="Amount" class="text-red"></span>
+          </div>
+          <input type="hidden" asp-for="OverdraftLimit">
+          <input type="hidden" asp-for="OverdrawnAmount">
+          <div class="form-group">
+            <p class="text-white">Your overdraft balance will be recovered on the next deposit into your account</p>
+            <p>Your current overdraft limit is <strong>$@Model.OverdraftLimit</strong></p>
+            <p>Amount already overdrawn is <strong>$@Model.OverdrawnAmount</strong></p>
+          </div>
+          <button type="submit" class="w-100 btn btn-blue mt-3 rounded-0">
+            Request Overdraft
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
