@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MvcBankingApplication.Models.Transactions;
 
 namespace MvcBankingApplication.Models.Accounts
 {
@@ -34,6 +35,9 @@ namespace MvcBankingApplication.Models.Accounts
             get { return _balance; }
             set { _balance = value; }
         }
+
+        public virtual IEnumerable<Transaction> CreditTransactions { get; set; }
+        public virtual IEnumerable<Transaction> DebitTransactions { get; set; }
 
         public override string ToString()
         {

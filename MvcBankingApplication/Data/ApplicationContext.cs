@@ -23,6 +23,15 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ApplicationUser>()
                 .Property(e => e.ImageUrl)
                 .HasDefaultValue("/images/users/avatar.png");
+        // transactions
+        builder.Entity<Transaction>()
+            .HasOne(m => m.AccountCredited)
+            .WithMany(ac => ac.CreditTransactions)
+            .HasForeignKey(m => m.AccountCreditedId);
+        builder.Entity<Transaction>()
+            .HasOne(m => m.AccountDebited)
+            .WithMany(ac => ac.DebitTransactions)
+            .HasForeignKey(m => m.AccountDebitedId);
 
         base.OnModelCreating(builder);
     }
