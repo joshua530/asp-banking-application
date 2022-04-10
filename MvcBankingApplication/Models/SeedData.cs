@@ -94,6 +94,14 @@ public class SeedData
                     CustomerId = customer.Id
                 });
 
+            context.CustomerAccounts.Add(
+                new Accounts.CustomerAccount
+                {
+                    OverdraftLimit = 1000,
+                    Balance = 20000,
+                    CustomerId = customer2.Id
+                });
+
             context.BankCashAccount.Add(
                 new Accounts.BankCashAccount
                 {
