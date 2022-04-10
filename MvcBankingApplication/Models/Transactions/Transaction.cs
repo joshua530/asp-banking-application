@@ -5,15 +5,29 @@ using MvcBankingApplication.Models.Accounts;
 
 namespace MvcBankingApplication.Models.Transactions
 {
+#pragma warning disable CS8632
     public class Transaction
     {
-#pragma warning disable CS8632
+        private DateTime _timeOfTransaction = DateTime.MinValue;
         public int ID { get; set; }
         [Required]
         [DataType(DataType.DateTime), DisplayFormat(
             DataFormatString = "H:mm:ss dd-MM-yyyy"
         )]
-        public DateTime TimeOfTransaction { get; set; }
+        public DateTime TimeOfTransaction
+        {
+            get
+            {
+                // create datetime for new object
+                if (_timeOfTransaction == DateTime.MinValue)
+                    _timeOfTransaction = DateTime.Now;
+                return _timeOfTransaction;
+            }
+            set
+            {
+                _timeOfTransaction = value;
+            }
+        }
 
         [Required]
         [DataType(DataType.Currency)]
