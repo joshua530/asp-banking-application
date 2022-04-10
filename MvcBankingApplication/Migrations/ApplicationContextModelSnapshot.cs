@@ -148,7 +148,7 @@ namespace MvcBankingApplication.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankCashAccount", b =>
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.AccountModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -157,55 +157,18 @@ namespace MvcBankingApplication.Migrations
                     b.Property<double>("Balance")
                         .HasColumnType("REAL");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BankCashAccount");
-                });
-
-            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankOverdraftAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("Balance")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BankOverdraftAccount");
-                });
-
-            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("Balance")
-                        .HasColumnType("REAL");
-
-                    b.Property<string>("CustomerId")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("OverdraftLimit")
-                        .HasColumnType("REAL");
-
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId")
-                        .IsUnique();
+                    b.ToTable("AccountModel");
 
-                    b.ToTable("CustomerAccounts");
+                    b.HasDiscriminator<string>("Discriminator").HasValue("AccountModel");
                 });
 
             modelBuilder.Entity("MvcBankingApplication.Models.Notifications.Notification", b =>
@@ -262,6 +225,10 @@ namespace MvcBankingApplication.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("AccountCreditedId");
+
+                    b.HasIndex("AccountDebitedId");
 
                     b.HasIndex("ApproverId");
 
@@ -358,17 +325,39 @@ namespace MvcBankingApplication.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("ApplicationUser");
                 });
 
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankCashAccount", b =>
+                {
+                    b.HasBaseType("MvcBankingApplication.Models.Accounts.AccountModel");
+
+                    b.HasDiscriminator().HasValue("BankCashAccount");
+                });
+
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.BankOverdraftAccount", b =>
+                {
+                    b.HasBaseType("MvcBankingApplication.Models.Accounts.AccountModel");
+
+                    b.HasDiscriminator().HasValue("BankOverdraftAccount");
+                });
+
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
+                {
+                    b.HasBaseType("MvcBankingApplication.Models.Accounts.AccountModel");
+
+                    b.Property<string>("CustomerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<double>("OverdraftLimit")
+                        .HasColumnType("REAL");
+
+                    b.HasIndex("CustomerId")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("CustomerAccount");
+                });
+
             modelBuilder.Entity("MvcBankingApplication.Models.Users.Admin", b =>
                 {
                     b.HasBaseType("MvcBankingApplication.Models.Users.ApplicationUser");
-
-                    b.Property<bool>("IsAdmin")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("StaffId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("TEXT");
 
                     b.HasDiscriminator().HasValue("Admin");
                 });
@@ -376,14 +365,6 @@ namespace MvcBankingApplication.Migrations
             modelBuilder.Entity("MvcBankingApplication.Models.Users.Cashier", b =>
                 {
                     b.HasBaseType("MvcBankingApplication.Models.Users.ApplicationUser");
-
-                    b.Property<bool>("IsAdmin")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("StaffId")
-                        .ValueGeneratedOnUpdateSometimes()
-                        .HasColumnType("TEXT");
 
                     b.Property<double>("TransactionLimit")
                         .HasColumnType("REAL");
@@ -449,15 +430,6 @@ namespace MvcBankingApplication.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
-                {
-                    b.HasOne("MvcBankingApplication.Models.Users.Customer", "Customer")
-                        .WithOne("Account")
-                        .HasForeignKey("MvcBankingApplication.Models.Accounts.CustomerAccount", "CustomerId");
-
-                    b.Navigation("Customer");
-                });
-
             modelBuilder.Entity("MvcBankingApplication.Models.Notifications.Notification", b =>
                 {
                     b.HasOne("MvcBankingApplication.Models.Users.ApplicationUser", "Owner")
@@ -469,6 +441,18 @@ namespace MvcBankingApplication.Migrations
 
             modelBuilder.Entity("MvcBankingApplication.Models.Transactions.Transaction", b =>
                 {
+                    b.HasOne("MvcBankingApplication.Models.Accounts.AccountModel", "AccountCredited")
+                        .WithMany("CreditTransactions")
+                        .HasForeignKey("AccountCreditedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MvcBankingApplication.Models.Accounts.AccountModel", "AccountDebited")
+                        .WithMany("DebitTransactions")
+                        .HasForeignKey("AccountDebitedId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MvcBankingApplication.Models.Users.Admin", "Approver")
                         .WithMany()
                         .HasForeignKey("ApproverId");
@@ -481,11 +465,31 @@ namespace MvcBankingApplication.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId");
 
+                    b.Navigation("AccountCredited");
+
+                    b.Navigation("AccountDebited");
+
                     b.Navigation("Approver");
 
                     b.Navigation("Cashier");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.CustomerAccount", b =>
+                {
+                    b.HasOne("MvcBankingApplication.Models.Users.Customer", "Customer")
+                        .WithOne("Account")
+                        .HasForeignKey("MvcBankingApplication.Models.Accounts.CustomerAccount", "CustomerId");
+
+                    b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("MvcBankingApplication.Models.Accounts.AccountModel", b =>
+                {
+                    b.Navigation("CreditTransactions");
+
+                    b.Navigation("DebitTransactions");
                 });
 
             modelBuilder.Entity("MvcBankingApplication.Models.Users.Customer", b =>

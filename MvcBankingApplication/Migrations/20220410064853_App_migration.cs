@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MvcBankingApplication.Migrations
 {
-    public partial class Initial_Create : Migration
+    public partial class App_migration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,8 +33,6 @@ namespace MvcBankingApplication.Migrations
                     DateCreated = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ImageUrl = table.Column<string>(type: "TEXT", nullable: true, defaultValue: "/images/users/avatar.png"),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    StaffId = table.Column<string>(type: "TEXT", nullable: true),
-                    IsAdmin = table.Column<bool>(type: "INTEGER", nullable: true),
                     TransactionLimit = table.Column<double>(type: "REAL", nullable: true),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -57,34 +55,6 @@ namespace MvcBankingApplication.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BankCashAccount",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Balance = table.Column<double>(type: "REAL", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BankCashAccount", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BankOverdraftAccount",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Balance = table.Column<double>(type: "REAL", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BankOverdraftAccount", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -103,6 +73,28 @@ namespace MvcBankingApplication.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AccountModel",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Balance = table.Column<double>(type: "REAL", nullable: false),
+                    Discriminator = table.Column<string>(type: "TEXT", nullable: false),
+                    OverdraftLimit = table.Column<double>(type: "REAL", nullable: true),
+                    CustomerId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountModel", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AccountModel_AspNetUsers_CustomerId",
+                        column: x => x.CustomerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -191,27 +183,6 @@ namespace MvcBankingApplication.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerAccounts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OverdraftLimit = table.Column<double>(type: "REAL", nullable: false),
-                    CustomerId = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    Balance = table.Column<double>(type: "REAL", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CustomerAccounts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_CustomerAccounts_AspNetUsers_CustomerId",
-                        column: x => x.CustomerId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Notifications",
                 columns: table => new
                 {
@@ -239,16 +210,28 @@ namespace MvcBankingApplication.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     TimeOfTransaction = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Amount = table.Column<double>(type: "REAL", nullable: false),
-                    AccountDebitedId = table.Column<int>(type: "INTEGER", nullable: false),
-                    AccountCreditedId = table.Column<int>(type: "INTEGER", nullable: false),
                     TransactionType = table.Column<int>(type: "INTEGER", nullable: false),
                     CustomerId = table.Column<string>(type: "TEXT", nullable: true),
                     CashierId = table.Column<string>(type: "TEXT", nullable: true),
-                    ApproverId = table.Column<string>(type: "TEXT", nullable: true)
+                    ApproverId = table.Column<string>(type: "TEXT", nullable: true),
+                    AccountDebitedId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AccountCreditedId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Transactions_AccountModel_AccountCreditedId",
+                        column: x => x.AccountCreditedId,
+                        principalTable: "AccountModel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Transactions_AccountModel_AccountDebitedId",
+                        column: x => x.AccountDebitedId,
+                        principalTable: "AccountModel",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Transactions_AspNetUsers_ApproverId",
                         column: x => x.ApproverId,
@@ -265,6 +248,12 @@ namespace MvcBankingApplication.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountModel_CustomerId",
+                table: "AccountModel",
+                column: "CustomerId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -304,15 +293,19 @@ namespace MvcBankingApplication.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerAccounts_CustomerId",
-                table: "CustomerAccounts",
-                column: "CustomerId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Notifications_ApplicationUserId",
                 table: "Notifications",
                 column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_AccountCreditedId",
+                table: "Transactions",
+                column: "AccountCreditedId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_AccountDebitedId",
+                table: "Transactions",
+                column: "AccountDebitedId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_ApproverId",
@@ -348,15 +341,6 @@ namespace MvcBankingApplication.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "BankCashAccount");
-
-            migrationBuilder.DropTable(
-                name: "BankOverdraftAccount");
-
-            migrationBuilder.DropTable(
-                name: "CustomerAccounts");
-
-            migrationBuilder.DropTable(
                 name: "Notifications");
 
             migrationBuilder.DropTable(
@@ -364,6 +348,9 @@ namespace MvcBankingApplication.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AccountModel");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
