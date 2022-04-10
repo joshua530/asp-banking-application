@@ -29,7 +29,8 @@
           <input type="hidden" asp-for="OverdraftLimit">
           <input type="hidden" asp-for="OverdrawnAmount">
           <div class="form-group">
-            <p class="text-white">Your overdraft balance will be recovered on the next deposit into your account</p>
+            <p class="text-white">Your overdraft balance will be recovered on the next deposit into your account. The
+              amount already in your account will be part of the recovery</p>
             <p>Your current overdraft limit is <strong>$@Model.OverdraftLimit</strong></p>
             <p>Amount already overdrawn is <strong>$@Model.OverdrawnAmount</strong></p>
           </div>
