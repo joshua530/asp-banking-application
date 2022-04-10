@@ -1,4 +1,5 @@
 using MvcBankingApplication.Models.Accounts;
+using MvcBankingApplication.Models.Transactions;
 using MvcBankingApplication.Models.Users;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,4 +17,5 @@ public class CustomerHomeModel
     {
         get { return "https://www.nasdaq.com/market-activity/stocks"; }
     }
+    public IEnumerable<Transaction> Transactions { get; set; }
 }
