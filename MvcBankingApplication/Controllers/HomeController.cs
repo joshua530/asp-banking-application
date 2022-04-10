@@ -1,20 +1,34 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using MvcBankingApplication.Models;
+using Microsoft.AspNetCore.Identity;
+using MvcBankingApplication.Models.Users;
 
 namespace MvcBankingApplication.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
     {
         _logger = logger;
+        _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public IActionResult Index()
     {
+        if (_signInManager.IsSignedIn(User))
+        {
+            if (User.IsInRole("customer"))
+            {
+                return RedirectToAction("", "Customers");
+            }
+            //TODO redirect for cashier and admin
+        }
         return View();
     }
 
