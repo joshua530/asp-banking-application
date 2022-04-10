@@ -112,22 +112,63 @@ namespace MvcBankingApplication.Controllers
                         fatalErrors.Add("The amount requested exceeds your account balance");
                         return View(model);
                     }
-                    toWithdrawFrom.Balance -= model.Amount;
+                    double amountBeingTransferred = model.Amount;
+                    toWithdrawFrom.Balance -= amountBeingTransferred;
                     // debit
-                    toSendTo.Balance += model.Amount;
+                    toSendTo.Balance += amountBeingTransferred;
                     // record transaction
                     Transaction tr = new Transaction
                     {
-                        Amount = model.Amount,
+                        Amount = amountBeingTransferred,
                         TransactionType = TransactionTypes.WIRE_TRANSFER,
                         CustomerId = userId,
                         AccountDebitedId = toSendTo.Id,
                         AccountCreditedId = toWithdrawFrom.Id
                     };
-                    // commit
                     _context.CustomerAccounts.Update(toWithdrawFrom);
                     _context.CustomerAccounts.Update(toSendTo);
                     _context.Transactions.Add(tr);
+
+                    // if there is an overdraft, recover it
+                    var overdrawnAmount = toSendTo.OverdrawnAmount;
+                    if (overdrawnAmount > 0)
+                    {
+                        double balanceOfOverdrawnAccount = toSendTo.Balance;
+                        double recoveredAmount;
+                        // balance of account can fully pay off overdraft
+                        if (balanceOfOverdrawnAccount >= overdrawnAmount)
+                        {
+                            recoveredAmount = overdrawnAmount;
+                        }
+                        else
+                        {
+                            recoveredAmount = balanceOfOverdrawnAccount;
+                        }
+
+                        // record overdraft recovery
+                        var bankOverdraftAccount = GetBankOverdraftAccount();
+                        bankOverdraftAccount.Balance += recoveredAmount;
+                        toSendTo.Balance -= recoveredAmount;
+                        toSendTo.OverdrawnAmount -= recoveredAmount;
+
+                        // increment overdraft limit by 10% if fully paid off
+                        if (overdrawnAmount == recoveredAmount)
+                        {
+                            toSendTo.OverdraftLimit *= 1.1;
+                        }
+                        // record transaction
+                        Transaction recovTransaction = new Transaction
+                        {
+                            Amount = recoveredAmount,
+                            TransactionType = TransactionTypes.CREDIT,
+                            AccountDebitedId = bankOverdraftAccount.Id,
+                            AccountCreditedId = toSendTo.Id
+                        };
+                        _context.Update(bankOverdraftAccount);
+                        _context.Update(toSendTo);
+                        _context.Add(recovTransaction);
+                    }
+
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
                 }
@@ -235,7 +276,7 @@ namespace MvcBankingApplication.Controllers
             }
 
             // transaction succeeded
-            TempData["Message"] = "Transaction posted successfully. Your overdraft balance will be recovered on the next deposit into your account";
+            TempData["Message"] = "Overdraft request was successful. Your overdraft balance will be recovered on the next deposit into your account. The amount already in your account will be part of the recovery";
             return RedirectToAction("", "Customers");
         }
 
