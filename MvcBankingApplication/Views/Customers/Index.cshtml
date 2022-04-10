@@ -6,12 +6,18 @@
 
 <div class="bg-dark py-3">
   <div class="container text-white">
+    @if (TempData["Message"] != null)
+    {
+      <div>
+        <p class="alert alert-info">@TempData["Message"]</p>
+      </div>
+    }
     <p>Hello <b>@Model.User.FullName</b>, below is a list of services you can access</p>
     <section class="my-5">
       <h2>Make transaction</h2>
       <ul>
         <li>
-          <a href="wire-transfer.html" class="site-link">Wire transfer</a>
+          <a asp-controller="Customers" asp-action="WireTransfer" class="site-link">Wire transfer</a>
         </li>
         <li>
           <a href="overdraft.html" class="site-link">Overdraft</a>
