@@ -9,6 +9,9 @@ namespace MvcBankingApplication.Models.Accounts
         [DataType(DataType.Currency)]
         public double OverdraftLimit { get; set; } = 1000;
 
+        [DataType(DataType.Currency)]
+        public double OverdrawnAmount { get; set; } = 0;
+
         [ForeignKey("Customer")]
         public string CustomerId { get; set; }
 
