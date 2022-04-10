@@ -22,11 +22,13 @@ namespace MvcBankingApplication.Controllers
     {
         private readonly ApplicationContext _context;
         UserManager<ApplicationUser> _userManager;
+        ILogger<CustomersController> _logger;
 
-        public CustomersController(ApplicationContext context, UserManager<ApplicationUser> userManager)
+        public CustomersController(ApplicationContext context, UserManager<ApplicationUser> userManager, ILogger<CustomersController> logger)
         {
             _context = context;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index(int page = default)
@@ -69,15 +71,11 @@ namespace MvcBankingApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> WireTransfer(WireTransferModel model)
         {
-            var accountQuery = from cust_ac in _context.CustomerAccounts
-                               where cust_ac.Id == model.AccountNumber
-                               select cust_ac;
-            var accountToSendToList = await accountQuery.ToArrayAsync();
-
             var fatalErrors = new List<string>();
             ViewData["FatalErrors"] = fatalErrors;
+            CustomerAccount toSendTo = FindCustomerAccountById(model.AccountNumber);
 
-            if (accountToSendToList.Length == 0)
+            if (toSendTo == null)
             {
                 ModelState.AddModelError("AccountNumber", "no account with that account number exists");
             }
@@ -87,19 +85,15 @@ namespace MvcBankingApplication.Controllers
                 return View(model);
             }
 
-            var userId = _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
-            var toWithdrawFromQuery = from cust_ac in _context.CustomerAccounts
-                                      where cust_ac.CustomerId == userId
-                                      select cust_ac;
-            var toWithdrawFromList = await toWithdrawFromQuery.ToArrayAsync();
-            if (toWithdrawFromList.Length == 0 || toWithdrawFromList.Length > 1)
+            var userId = GetUserId();
+            CustomerAccount toWithdrawFrom = FindCustomerAccountByUserId(userId);
+            // customer lacks account
+            if (toWithdrawFrom == null)
             {
                 fatalErrors.Add("Error occured. Our technical team has been notified. If this error persists, contact customer service.");
+                _logger.LogCritical("Customer has no account");
                 return View(model);
             }
-
-            CustomerAccount toWithdrawFrom = toWithdrawFromList[0];
-            CustomerAccount toSendTo = accountToSendToList[0];
 
             if (toWithdrawFrom.Id == toSendTo.Id)
             {
@@ -140,6 +134,7 @@ namespace MvcBankingApplication.Controllers
                 catch (OperationCanceledException)
                 {
                     fatalErrors.Add("Transaction failed. Refresh page and try again. If the error persists, contact us.");
+                    _logger.LogError("Transaction failed");
                     return View(model);
                 }
             }
@@ -147,6 +142,133 @@ namespace MvcBankingApplication.Controllers
             // transaction succeeded
             TempData["Message"] = "Transaction posted successfully";
             return RedirectToAction("", "Customers");
+        }
+
+        public IActionResult Overdraft()
+        {
+            var userId = GetUserId();
+            var userAccount = FindCustomerAccountByUserId(userId);
+            var model = new OverdraftModel
+            {
+                OverdraftLimit = userAccount.OverdraftLimit,
+                OverdrawnAmount = userAccount.OverdrawnAmount
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Overdraft(OverdraftModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var fatalErrors = new List<string>();
+            ViewData["FatalErrors"] = fatalErrors;
+
+            var userId = GetUserId();
+            CustomerAccount customerAccount = FindCustomerAccountByUserId(userId);
+            // customer has no account
+            if (customerAccount == null)
+            {
+                fatalErrors.Add("Error occured. Our technical team has been notified. If this error persists, contact customer service.");
+                _logger.LogCritical("Customer has no account");
+                return View(model);
+            }
+
+            var allowedAmount = customerAccount.OverdraftLimit - customerAccount.OverdrawnAmount;
+            // customer has already reached overdraw limit
+            if (allowedAmount <= 0)
+            {
+                fatalErrors.Add("You have already reached your overdraft limit. Pay off the overdrawn amount first in order to overdraw again");
+                return View(model);
+            }
+            var overdraftDifference = allowedAmount - model.Amount;
+            // requested amount will exceed allowed amount
+            if (overdraftDifference < 0)
+            {
+                fatalErrors.Add("Requested amount exceeds your overdraft limit");
+                return View(model);
+            }
+
+            BankOverdraftAccount bankOverdraftAccount = GetBankOverdraftAccount();
+            if (bankOverdraftAccount == null)
+            {
+                fatalErrors.Add("Error occured. Our technical team has been notified. If this error persists, contact customer service.");
+                _logger.LogCritical("Bank overdraft account does not exist");
+                return View(model);
+            }
+
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
+                {
+                    // credit
+                    bankOverdraftAccount.Balance -= model.Amount;
+                    // debit
+                    customerAccount.Balance += model.Amount;
+                    customerAccount.OverdrawnAmount += model.Amount;
+                    // save transaction
+                    Transaction tr = new Transaction
+                    {
+                        Amount = model.Amount,
+                        TransactionType = TransactionTypes.OVERDRAFT,
+                        CustomerId = userId,
+                        AccountCreditedId = bankOverdraftAccount.Id,
+                        AccountDebitedId = customerAccount.Id
+                    };
+                    // post transaction
+                    _context.CustomerAccounts.Update(customerAccount);
+                    _context.BankOverdraftAccount.Update(bankOverdraftAccount);
+                    _context.Transactions.Add(tr);
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                }
+                catch (OperationCanceledException)
+                {
+                    fatalErrors.Add("Transaction failed. Refresh page and try again. If the error persists, contact us.");
+                    _logger.LogError("Transaction failed");
+                    return View(model);
+                }
+            }
+
+            // transaction succeeded
+            TempData["Message"] = "Transaction posted successfully. Your overdraft balance will be recovered on the next deposit into your account";
+            return RedirectToAction("", "Customers");
+        }
+
+        private string GetUserId()
+        {
+            return _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
+        }
+
+        private CustomerAccount FindCustomerAccountByUserId(string userId)
+        {
+            var customerAccountQuery = from cust_ac in _context.CustomerAccounts
+                                       where cust_ac.CustomerId == userId
+                                       select cust_ac;
+
+            var customerAccount = customerAccountQuery.FirstOrDefault();
+            return customerAccount;
+        }
+
+        private BankOverdraftAccount GetBankOverdraftAccount()
+        {
+            var bankOverdraftQuery = from b_overdraft in _context.BankOverdraftAccount
+                                     select b_overdraft;
+            var bankOverdraftAccount = bankOverdraftQuery.FirstOrDefault();
+            return bankOverdraftAccount;
+        }
+
+        private CustomerAccount FindCustomerAccountById(int id)
+        {
+            var accountQuery = from cust_ac in _context.CustomerAccounts
+                               where cust_ac.Id == id
+                               select cust_ac;
+            var account = accountQuery.FirstOrDefault();
+            return account;
         }
     }
 }
