@@ -76,10 +76,10 @@ public class SeedData
 
             var customer2 = new Users.Customer
             {
-                FirstName = "Alice",
-                LastName = "Doe",
-                UserName = "alicedoe",
-                Email = "alicedoe@email.com",
+                FirstName = "Test",
+                LastName = "User",
+                UserName = "testuser",
+                Email = "testuser@email.com",
                 EmailConfirmed = true
             };
             await userManager.CreateAsync(customer2, "abcdef*A2");
