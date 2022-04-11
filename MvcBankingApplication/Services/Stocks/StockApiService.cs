@@ -20,13 +20,22 @@ namespace MvcBankingApplication.Services.Stocks
                 StockModel[] stocks;
                 if (cachedStocks == RedisValue.Null || ExpirationTimePassed((string)expirationTime))
                 {
-                    stocks = ApiRequests.GetDataForStocks(StockNames);
-                    // serialize the stocks
-                    string serializedStocks = SerializeStocks(stocks);
-                    Cache.StringSet("stocks", serializedStocks);
-                    // set the timestamp at which the data will become stale
-                    Cache.StringSet("expiration_time", GenerateExpirationTime(5));
-                    return stocks;
+                    try
+                    {
+                        stocks = ApiRequests.GetDataForStocks(StockNames);
+                        // serialize the stocks
+                        string serializedStocks = SerializeStocks(stocks);
+                        Cache.StringSet("stocks", serializedStocks);
+                        // set the timestamp at which the data will become stale
+                        Cache.StringSet("expiration_time", GenerateExpirationTime(5));
+                        return stocks;
+                    }
+                    catch (HttpRequestException)
+                    {
+                        // if network is unreachable, we'll just return the cached stocks
+                        // and attempt a re-fetch during the next request
+                    }
+
                 }
                 string stockStr = Cache.StringGet("stocks");
                 return DeserializeStocksStr(stockStr);
