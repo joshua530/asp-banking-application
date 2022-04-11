@@ -9,6 +9,7 @@ namespace MvcBankingApplication.Models.Transactions
     public class Transaction
     {
         private DateTime _timeOfTransaction = DateTime.Now;
+        [DisplayFormat(DataFormatString = "{0:D3}")]
         public int ID { get; set; }
         [Required]
         [DataType(DataType.DateTime), DisplayFormat(
@@ -43,9 +44,11 @@ namespace MvcBankingApplication.Models.Transactions
         public string ApproverId { get; set; }
         public virtual Admin Approver { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:D5}")]
         public int AccountDebitedId { get; set; }
         public virtual AccountModel AccountDebited { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:D5}")]
         public int AccountCreditedId { get; set; }
         public virtual AccountModel AccountCredited { get; set; }
     }
