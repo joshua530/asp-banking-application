@@ -9,13 +9,10 @@ public class CustomerHomeModel
 {
     public Customer User { get; set; }
     public CustomerAccount Account { get; set; }
-    // account
-    // account transactions -> separate model
-    // stock quotes
     public StockModel[] Stocks { get; set; }
     public string StockMarketLink
     {
         get { return "https://www.nasdaq.com/market-activity/stocks"; }
     }
-    public IEnumerable<Transaction> Transactions { get; set; }
+    public IEnumerable<TransactionWithTypeStr> Transactions { get; set; }
 }
