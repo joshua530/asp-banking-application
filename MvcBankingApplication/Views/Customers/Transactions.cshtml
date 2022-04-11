@@ -9,49 +9,41 @@
     <div class="d-flex justify-content-center">
       <form class="text-white my-4">
         <div class="form-group d-flex">
-          <input placeholder="Enter keyword" type="number" name="key" class="form-control" id="search-key">
+          <input placeholder="Enter transaction id or account id" value="@ViewData["key"]" type="number" name="key"
+            class="form-control" id="search-key">
           <button class="btn btn-blue">search</button>
         </div>
         <div class="row my-2">
           <div class="col">
             <div class="form-outline">
               <label class="form-label" for="min-amount">Min amount</label>
-              <input type="text" name="min-amount" id="min-amount" class="form-control" />
+              <input type="number" value="@ViewData["minAmount"]" name="minAmount" id="min-amount"
+                class="form-control" />
             </div>
           </div>
           <div class="col text-white">
             <div class="form-outline">
               <label class="form-label" for="max-amount">Max amount</label>
-              <input type="text" name="max-amount" id="max-amount" class="form-control" />
-            </div>
-          </div>
-        </div>
-        <div class="row my-2">
-          <div class="col">
-            <div class="form-outline">
-              <label class="form-label" for="start-date">Start date</label>
-              <input type="date" name="start-date" id="start-date" class="form-control" />
-            </div>
-          </div>
-          <div class="col text-white">
-            <div class="form-outline">
-              <label class="form-label" for="end-date">End date</label>
-              <input type="date" name="end-date" id="end-date" class="form-control" />
+              <input type="number" value="@ViewData["maxAmount"]" name="maxAmount" id="max-amount"
+                class="form-control" />
             </div>
           </div>
         </div>
         <div class="form-group mt-3">
           <div class="d-flex">
-            <p class="text-uppercase me-5">Transaction type</p>
+            <p class="text-uppercase me-5">Transaction in relation to your account</p>
             <div class="form-group me-3">
-              <input checked type="checkbox" name="CR" id="credit">
+              <input @ViewData["cr"] type="checkbox" name="cr" id="credit">
               <label for="credit">Credit</label>
             </div>
             <div class="form-group">
-              <input checked type="checkbox" name="DR" id="debit">
+              <input @ViewData["dr"] type="checkbox" name="dr" id="debit">
               <label for="debit">Debit</label>
             </div>
           </div>
+        </div>
+        <div class="form-group">
+          <button class="w-100 btn btn-blue rounded-0">Search</button>
         </div>
       </form>
     </div>

@@ -55,13 +55,87 @@ namespace MvcBankingApplication.Controllers
             return View(homeModel);
         }
 
-        public async Task<IActionResult> Transactions()
+        public async Task<IActionResult>
+        Transactions(
+            int key = int.MinValue,
+            int minAmount = int.MinValue,
+            int maxAmount = int.MaxValue,
+            string dr = null, string cr = null)
         {
             var user = await _userManager.GetUserAsync(User);
             var customer = (Customer)user;
             CustomerAccount account = FindCustomerAccountByUserId(user.Id);
-            IEnumerable<TransactionWithTypeStr> transactions = FindTransactions(account.Id, 1, 5);
-            return View(transactions);
+
+            // normalize max and min amounts
+            if (maxAmount < minAmount)
+            {
+                maxAmount = minAmount;
+            }
+
+            // find transaction type
+            string trxType = "all";
+            if (dr == "on" && cr == null)
+            {
+                trxType = "debit";
+            }
+            else if (dr == null && cr == "on")
+            {
+                trxType = "credit";
+            }
+
+            var query = _context.Transactions
+                        .Where(
+                            trx => trx.Amount >= minAmount
+                            && trx.Amount <= maxAmount);
+            // if key is set, use it
+            if (key >= 1)
+            {
+                query = query.Where(
+                    trx => trx.ID == key
+                    || trx.AccountCreditedId == key
+                    || trx.AccountDebitedId == key);
+            }
+            // transaction type
+            if (trxType == "debit")
+            {
+                query = query.Where(trx => trx.AccountDebitedId == account.Id);
+            }
+            else if (trxType == "credit")
+            {
+                query = query.Where(trx => trx.AccountCreditedId == account.Id);
+            }
+
+            int page = 1;
+            int pageSize = 5;
+            List<Transaction> withoutTypeStr = query.Skip((page - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .OrderByDescending(t => t.TimeOfTransaction)
+                                    .ToListAsync().GetAwaiter().GetResult();
+            IEnumerable<TransactionWithTypeStr> transactionsWithTypeStr = AddTypeStrToTransactions(withoutTypeStr, account.Id);
+
+            // persist input from the user to search form
+            if (key == int.MinValue)
+                ViewData["key"] = "";
+            else
+                ViewData["key"] = key;
+            if (minAmount == int.MinValue)
+                ViewData["minAmount"] = "";
+            else
+                ViewData["minAmount"] = minAmount;
+            if (maxAmount == int.MaxValue)
+                ViewData["maxAmount"] = "";
+            else
+                ViewData["maxAmount"] = maxAmount;
+            if (dr == "on")
+                ViewData["dr"] = "checked";
+            else
+                ViewData["dr"] = "";
+            if (cr == "on")
+                ViewData["cr"] = "checked";
+            else
+                ViewData["cr"] = "";
+
+            return View(transactionsWithTypeStr);
         }
 
         public IActionResult WireTransfer()
@@ -324,13 +398,18 @@ namespace MvcBankingApplication.Controllers
                                                select tr;
             var stockApi = new StockApiModel();
 
-            List<TransactionWithTypeStr> transactions = new List<TransactionWithTypeStr>();
             var fetchedTransactions = trxQuery
                                     .Skip((page - 1) * pageSize)
                                     .Take(pageSize)
                                     .OrderByDescending(t => t.TimeOfTransaction)
                                     .ToListAsync().GetAwaiter().GetResult();
-            foreach (var trx in fetchedTransactions)
+            return AddTypeStrToTransactions(fetchedTransactions, accountId);
+        }
+
+        private IEnumerable<TransactionWithTypeStr> AddTypeStrToTransactions(IEnumerable<Transaction> list, int accountId)
+        {
+            List<TransactionWithTypeStr> transactions = new List<TransactionWithTypeStr>();
+            foreach (var trx in list)
             {
                 string type = "DR";
                 if (trx.AccountCreditedId == accountId)
