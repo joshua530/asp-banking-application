@@ -2,6 +2,7 @@
 
 @{
   ViewData["Title"] = "Home Page";
+  var Transactions = Model.Transactions;
 }
 
 <div class="bg-dark py-3">
@@ -23,7 +24,8 @@
           <a asp-controller="Customers" asp-action="Overdraft" class="site-link">Overdraft</a>
         </li>
         <li>
-          <i>To make a cash deposit or withdrawal, go to the <a href="#">Nearest Branch</a></i>
+          <i>To make a cash deposit or withdrawal, go to the <a asp-controller="Home" asp-action="BranchesNearUser"
+              class="site-link">Nearest Branch</a></i>
         </li>
       </ul>
     </section>
@@ -45,21 +47,23 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>22 March 2021</td>
-              <td>2000</td>
-              <td class="text-green">DR</td>
-            </tr>
-            <tr>
-              <td>12 Apr 2020</td>
-              <td>10000</td>
-              <td class="text-red">CR</td>
-            </tr>
-            <tr>
-              <td>11 Apr 2020</td>
-              <td>200000</td>
-              <td class="text-green">DR</td>
-            </tr>
+            @foreach (var trx in Transactions)
+            {
+              var textClass = "text-green";
+              var transactionType = "debit";
+              @if (trx.TransactionTypeStr == "CR")
+              {
+                textClass = "text-red";
+                transactionType = "credit";
+              }
+              <tr>
+                <td>@Html.DisplayFor(m => trx.TimeOfTransaction)</td>
+                <td>@trx.Amount</td>
+                <td class="@textClass" title="@transactionType">
+                  @trx.TransactionTypeStr
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
         <a href="#" class="site-link d-block mt-4">view more transactions</a>
