@@ -44,18 +44,38 @@ namespace MvcBankingApplication.Controllers
                 page = 1;
             }
             int pageSize = 5;
-            IQueryable<Transaction> trxQuery = from tr in _context.Transactions.Skip((page - 1) * pageSize).Take(pageSize)
+            IQueryable<Transaction> trxQuery = from tr in _context.Transactions
                                                where tr.AccountCreditedId == account.Id ||
                                                tr.AccountDebitedId == account.Id
                                                select tr;
             var stockApi = new StockApiModel();
+
+            List<TransactionWithTypeStr> transactions = new List<TransactionWithTypeStr>();
+            var fetchedTransactions = await trxQuery
+                                    .Skip((page - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .OrderByDescending(t => t.TimeOfTransaction)
+                                    .ToListAsync();
+            foreach (var trx in fetchedTransactions)
+            {
+                string type = "DR";
+                if (trx.AccountCreditedId == account.Id)
+                    type = "CR";
+
+                transactions.Add(new TransactionWithTypeStr
+                {
+                    TimeOfTransaction = trx.TimeOfTransaction,
+                    Amount = trx.Amount,
+                    TransactionTypeStr = type
+                });
+            }
 
             var homeModel = new CustomerHomeModel
             {
                 User = customer,
                 Account = account,
                 Stocks = stockApi.GetStocks(),
-                Transactions = await trxQuery.ToListAsync()
+                Transactions = transactions
             };
 
             return View(homeModel);
