@@ -35,40 +35,14 @@ namespace MvcBankingApplication.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
             var customer = (Customer)user;
-            IQueryable<CustomerAccount> query = from c_a in _context.CustomerAccounts
-                                                where c_a.CustomerId == customer.Id
-                                                select c_a;
-            CustomerAccount account = await query.FirstAsync();
+            CustomerAccount account = FindCustomerAccountByUserId(user.Id);
             if (page < 1)
             {
                 page = 1;
             }
             int pageSize = 5;
-            IQueryable<Transaction> trxQuery = from tr in _context.Transactions
-                                               where tr.AccountCreditedId == account.Id ||
-                                               tr.AccountDebitedId == account.Id
-                                               select tr;
             var stockApi = new StockApiModel();
-
-            List<TransactionWithTypeStr> transactions = new List<TransactionWithTypeStr>();
-            var fetchedTransactions = await trxQuery
-                                    .Skip((page - 1) * pageSize)
-                                    .Take(pageSize)
-                                    .OrderByDescending(t => t.TimeOfTransaction)
-                                    .ToListAsync();
-            foreach (var trx in fetchedTransactions)
-            {
-                string type = "DR";
-                if (trx.AccountCreditedId == account.Id)
-                    type = "CR";
-
-                transactions.Add(new TransactionWithTypeStr
-                {
-                    TimeOfTransaction = trx.TimeOfTransaction,
-                    Amount = trx.Amount,
-                    TransactionTypeStr = type
-                });
-            }
+            IEnumerable<TransactionWithTypeStr> transactions = FindTransactions(account.Id, page, pageSize);
 
             var homeModel = new CustomerHomeModel
             {
@@ -79,6 +53,15 @@ namespace MvcBankingApplication.Controllers
             };
 
             return View(homeModel);
+        }
+
+        public async Task<IActionResult> Transactions()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var customer = (Customer)user;
+            CustomerAccount account = FindCustomerAccountByUserId(user.Id);
+            IEnumerable<TransactionWithTypeStr> transactions = FindTransactions(account.Id, 1, 5);
+            return View(transactions);
         }
 
         public IActionResult WireTransfer()
@@ -300,6 +283,7 @@ namespace MvcBankingApplication.Controllers
             return RedirectToAction("", "Customers");
         }
 
+        //################ refactored methods ###################3
         private string GetUserId()
         {
             return _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
@@ -330,6 +314,38 @@ namespace MvcBankingApplication.Controllers
                                select cust_ac;
             var account = accountQuery.FirstOrDefault();
             return account;
+        }
+
+        private IEnumerable<TransactionWithTypeStr> FindTransactions(int accountId, int page, int pageSize)
+        {
+            IQueryable<Transaction> trxQuery = from tr in _context.Transactions
+                                               where tr.AccountCreditedId == accountId ||
+                                               tr.AccountDebitedId == accountId
+                                               select tr;
+            var stockApi = new StockApiModel();
+
+            List<TransactionWithTypeStr> transactions = new List<TransactionWithTypeStr>();
+            var fetchedTransactions = trxQuery
+                                    .Skip((page - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .OrderByDescending(t => t.TimeOfTransaction)
+                                    .ToListAsync().GetAwaiter().GetResult();
+            foreach (var trx in fetchedTransactions)
+            {
+                string type = "DR";
+                if (trx.AccountCreditedId == accountId)
+                    type = "CR";
+                transactions.Add(new TransactionWithTypeStr
+                {
+                    TimeOfTransaction = trx.TimeOfTransaction,
+                    Amount = trx.Amount,
+                    TransactionTypeStr = type,
+                    ID = trx.ID,
+                    AccountDebitedId = trx.AccountDebitedId,
+                    AccountCreditedId = trx.AccountCreditedId
+                });
+            }
+            return transactions;
         }
     }
 }
