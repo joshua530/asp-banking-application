@@ -12,7 +12,7 @@ namespace MvcBankingApplication.Models.Transactions
         public int ID { get; set; }
         [Required]
         [DataType(DataType.DateTime), DisplayFormat(
-            DataFormatString = "H:mm:ss dd-MM-yyyy"
+            DataFormatString = "{0:dd MMMM, yyyy}"
         )]
         public DateTime TimeOfTransaction
         {
@@ -48,6 +48,11 @@ namespace MvcBankingApplication.Models.Transactions
 
         public int AccountCreditedId { get; set; }
         public virtual AccountModel AccountCredited { get; set; }
+    }
+
+    public class TransactionWithTypeStr : Transaction
+    {
+        public string TransactionTypeStr { get; set; }
     }
 #pragma warning restore CS8632
 }
