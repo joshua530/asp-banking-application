@@ -76,6 +76,8 @@
         <li>Balance: @Model.Account.Balance</li>
         <li>Account number: @Html.DisplayFor(m => m.Account.Id)</li>
         <li>Date opened: @Html.DisplayFor(m => m.User.DateCreated)</li>
+        <li>Overdraft limit: @Model.Account.OverdraftLimit</li>
+        <li>Amount already overdrawn: @Model.Account.OverdrawnAmount</li>
       </ul>
     </section>
     <hr>
