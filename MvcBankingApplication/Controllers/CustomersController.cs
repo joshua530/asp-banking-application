@@ -108,8 +108,8 @@ namespace MvcBankingApplication.Controllers
             int page = 1;
             int pageSize = 5;
             List<Transaction> withoutTypeStr = query.Skip((page - 1) * pageSize)
-                                    .Take(pageSize)
                                     .OrderByDescending(t => t.TimeOfTransaction)
+                                    .Take(pageSize)
                                     .ToListAsync().GetAwaiter().GetResult();
             IEnumerable<TransactionWithTypeStr> transactionsWithTypeStr = AddTypeStrToTransactions(withoutTypeStr, account.Id);
 
@@ -400,8 +400,8 @@ namespace MvcBankingApplication.Controllers
 
             var fetchedTransactions = trxQuery
                                     .Skip((page - 1) * pageSize)
-                                    .Take(pageSize)
                                     .OrderByDescending(t => t.TimeOfTransaction)
+                                    .Take(pageSize)
                                     .ToListAsync().GetAwaiter().GetResult();
             return AddTypeStrToTransactions(fetchedTransactions, accountId);
         }
