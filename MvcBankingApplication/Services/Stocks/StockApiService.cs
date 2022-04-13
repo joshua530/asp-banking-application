@@ -30,12 +30,20 @@ namespace MvcBankingApplication.Services.Stocks
                         Cache.StringSet("expiration_time", GenerateExpirationTime(5));
                         return stocks;
                     }
+                    // in case of an error, return the cached stocks and attempt
+                    // to refresh the data during the next request
+                    catch (NullReferenceException)
+                    {
+                        // invalid stock data returned
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        // there was an error while trying to serialize the data
+                    }
                     catch (HttpRequestException)
                     {
-                        // if network is unreachable, we'll just return the cached stocks
-                        // and attempt a re-fetch during the next request
+                        // network is unreachable
                     }
-
                 }
                 string stockStr = Cache.StringGet("stocks");
                 return DeserializeStocksStr(stockStr);
