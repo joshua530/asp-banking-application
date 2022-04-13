@@ -1,7 +1,7 @@
 @model MvcBankingApplication.Models.Users.Cashier
 
 @{
-  ViewData["Title"] = "staff home - {username}";
+  ViewData["Title"] = "cashier home";
 }
 
 <div class="bg-dark py-3">
@@ -11,16 +11,16 @@
       <h2>Choose one action below</h2>
       <ul>
         <li>
-          <a href="#" class="site-link">Cash deposit</a>
+          <a asp-for="Cashiers" asp-action="WithdrawDepositOverdraft" class="site-link">Cash deposit</a>
         </li>
         <li>
-          <a href="#" class="site-link">Cash withdrawal</a>
+          <a asp-for="Cashiers" asp-action="WithdrawDepositOverdraft" class="site-link">Cash withdrawal</a>
         </li>
         <li>
           <a href="#" class="site-link">Wire transfer</a>
         </li>
         <li>
-          <a href="#" class="site-link">Overdraft</a>
+          <a asp-for="Cashiers" asp-action="WithdrawDepositOverdraft" class="site-link">Overdraft</a>
         </li>
         <li>
           <a href="#" class="site-link">View transactions</a>
