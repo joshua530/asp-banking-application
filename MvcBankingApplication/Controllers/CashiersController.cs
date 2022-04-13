@@ -8,17 +8,25 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using MvcBankingApplication.Models.Transactions;
 
 
 namespace MvcBankingApplication.Controllers
 {
+    [Authorize(Roles = "cashier")]
     public class CashiersController : Controller
     {
         private readonly ApplicationContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<CashiersController> _logger;
 
-        public CashiersController(ApplicationContext context)
+        public CashiersController(ApplicationContext context, UserManager<ApplicationUser> userManager, ILogger<CashiersController> logger)
         {
             _context = context;
+            _userManager = userManager;
+            _logger = logger;
         }
 
         public IActionResult GeneralTransactions()
@@ -39,6 +47,115 @@ namespace MvcBankingApplication.Controllers
         public IActionResult WithdrawDepositOverdraft()
         {
             var model = new WithdrawDepositOverdraftModel();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> WithdrawDepositOverdraft(WithdrawDepositOverdraftModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var errors = new List<string>();
+                ViewData["FatalErrors"] = errors;
+                // ensure account number is valid and belongs to a customer
+                var accountQuery = from c_a in _context.CustomerAccounts
+                                   where c_a.Id == model.AccountNumber
+                                   select c_a;
+                var customerAccount = accountQuery.FirstOrDefault();
+                if (customerAccount == null)
+                {
+                    ModelState.AddModelError("AccountNumber", "Invalid account number");
+                    return View(model);
+                }
+
+                var cashier = (Cashier)_userManager.GetUserAsync(User).GetAwaiter().GetResult();
+                bool shouldBeApproved = false;
+                if (cashier.TransactionLimit < model.Amount)
+                {
+                    shouldBeApproved = true;
+                }
+
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
+                    if (bankCashAccount == null)
+                    {
+                        errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
+                        _logger.LogCritical("bank cash model does not exist");
+                        return View();
+                    }
+
+                    // deposits need no approval
+                    if (model.TransactionType == TransactionType.Deposit)
+                    {
+                        // add amount to customer account
+                        customerAccount.Balance += model.Amount;
+                        bankCashAccount.Balance -= model.Amount;
+                        var trx1 = new Transaction
+                        {
+                            Amount = model.Amount,
+                            TransactionType = TransactionTypes.DEBIT,
+                            CustomerId = customerAccount.CustomerId,
+                            AccountDebitedId = customerAccount.Id,
+                            AccountCreditedId = bankCashAccount.Id
+                        };
+                        _context.Transactions.Add(trx1);
+
+                        // repay overdraft
+                        if (customerAccount.OverdrawnAmount > 0)
+                        {
+                            var bankOverdraftAccount = _context.BankOverdraftAccount.FirstOrDefault();
+                            var overdrawnAmount = customerAccount.OverdrawnAmount;
+                            // amount in customer's account is sufficient to fully pay
+                            // out overdraft balance
+                            if (customerAccount.Balance >= overdrawnAmount)
+                            {
+                                customerAccount.Balance -= overdrawnAmount;
+                                customerAccount.OverdrawnAmount -= overdrawnAmount;
+                                // since the balance is fully paid, increment
+                                // their overdraft limit
+                                customerAccount.OverdraftLimit *= 1.1;
+                                bankOverdraftAccount.Balance += overdrawnAmount;
+                                var trx2 = new Transaction
+                                {
+                                    Amount = overdrawnAmount,
+                                    TransactionType = TransactionTypes.CREDIT,
+                                    CustomerId = customerAccount.CustomerId,
+                                    AccountDebitedId = bankOverdraftAccount.Id,
+                                    AccountCreditedId = customerAccount.Id
+                                };
+                                _context.Transactions.Add(trx2);
+                            }
+                            // amount in customer's account is not sufficient enough
+                            // to fully pay out the overdraft balance
+                            else
+                            {
+                                var paidAmount = customerAccount.Balance;
+                                bankOverdraftAccount.Balance += paidAmount;
+                                customerAccount.Balance = 0;
+                                customerAccount.OverdrawnAmount -= paidAmount;
+                                var trx3 = new Transaction
+                                {
+                                    Amount = paidAmount,
+                                    TransactionType = TransactionTypes.CREDIT,
+                                    CustomerId = customerAccount.CustomerId,
+                                    AccountDebitedId = bankOverdraftAccount.Id,
+                                    AccountCreditedId = customerAccount.Id
+                                };
+                                _context.Transactions.Add(trx3);
+                            }
+                            _context.BankOverdraftAccount.Update(bankOverdraftAccount);
+                        }
+                        _context.CustomerAccounts.Update(customerAccount);
+                        _context.BankCashAccount.Update(bankCashAccount);
+                        await _context.SaveChangesAsync();
+
+                        await transaction.CommitAsync();
+                        return RedirectToAction("", "Cashiers");
+                    }
+                }
+            }
             return View(model);
         }
     }
