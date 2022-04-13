@@ -3,6 +3,11 @@
 
 @{
   ViewData["Title"] = "withdraw,deposit,overdraft";
+  List<string> errors;
+  if (ViewData["FatalErrors"] != null)
+    errors = (List<string>)ViewData["FatalErrors"];
+  else
+    errors = new List<string>();
 }
 
 <div class="bg-dark">
@@ -11,6 +16,12 @@
     <div class="row">
       <div class="col-md-4">
         <form method="post">
+          <ul>
+            @foreach (var err in errors)
+            {
+              <li class="text-red">@err</li>
+            }
+          </ul>
           <div class="form-group mb-4">
             <label class="form-label" asp-for="TransactionType"></label>
             <select class="form-control" asp-for="TransactionType"
