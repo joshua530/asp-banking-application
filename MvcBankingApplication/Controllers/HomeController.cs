@@ -31,7 +31,10 @@ public class HomeController : Controller
             {
                 return RedirectToAction("", "Admin");
             }
-            //TODO redirect for cashier
+            else if (User.IsInRole("cashier"))
+            {
+                return RedirectToAction("", "Cashiers");
+            }
         }
         return View();
     }
