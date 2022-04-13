@@ -1,32 +1,35 @@
-@model MvcBankingApplication.Models.Users.Cashier
+@model MvcBankingApplication.Models.ViewModels.WithdrawDepositOverdraftModel
+@using MvcBankingApplication.Models.ViewModels
 
 @{
-  ViewData["Title"] = "withdraw,deposit,overdraft - {username}";
+  ViewData["Title"] = "withdraw,deposit,overdraft";
 }
 
-<div class="py-5 bg-dark d-flex justify-content-center">
-  <form class="bg-light py-4 mt-4 px-2 px-md-3 rounded">
-    <h5 class="mb-5 text-uppercase text-dark text-light">perform transaction</h5>
-    <div class="form-group mb-4">
-      <select name="type" id="" class="form-control">
-        <option value="NONE" selected>---</option>
-        <option value="withdraw">withdraw</option>
-        <option value="deposit">deposit</option>
-        <option value="overdraft">overdraft</option>
-      </select>
-      <label class="form-label" for="type">Type</label>
+<div class="bg-dark">
+  <div class="text-white container py-5">
+    <h2 class="mb-3">Wire Transfer</h2>
+    <div class="row">
+      <div class="col-md-4">
+        <form method="post">
+          <div class="form-group mb-4">
+            <label class="form-label" asp-for="TransactionType"></label>
+            <select class="form-control" asp-for="TransactionType"
+              asp-items="Html.GetEnumSelectList<TransactionType>()"></select>
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label" asp-for="AccountNumber"></label>
+            <input placeholder="Enter account number" asp-for="AccountNumber" class="form-control"
+              aria-required="true" />
+            <span asp-validation-for="AccountNumber" class="text-red"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" asp-for="Amount"></label>
+            <input placeholder="Enter amount" asp-for="Amount" class="form-control" aria-required="true" />
+            <span asp-validation-for="Amount" class="text-red"></span>
+          </div>
+          <button type="submit" class="w-100 btn btn-blue mt-3 rounded-0">Transact</button>
+        </form>
+      </div>
     </div>
-    <div class="form-outline mb-4">
-      <input type="number" id="amount" class="form-control form-control-lg" />
-      <label class="form-label" for="amount">Amount</label>
-    </div>
-    <div class="form-outline mb-4">
-      <input type="number" id="account-number" class="form-control form-control-lg" />
-      <label class="form-label" for="account-number">Account number</label>
-    </div>
-
-    <div class="d-flex justify-content-end pt-3">
-      <button type="button" class="btn btn-success btn-blue w-100 rounded-0">Post Transaction</button>
-    </div>
-  </form>
+  </div>
 </div>
