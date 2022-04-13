@@ -16,8 +16,10 @@ public class WithdrawDepositOverdraftModel
 {
     [Display(Name = "Select transaction type")]
     public TransactionType TransactionType { get; set; }
+
+    [Range(1, 9999999.99)]
     public double Amount { get; set; }
+
     [Display(Name = "Account number")]
-    [Range(1, 999999.99)]
     public int AccountNumber { get; set; }
 }
