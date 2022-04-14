@@ -11,6 +11,7 @@ using MvcBankingApplication.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MvcBankingApplication.Models.Transactions;
+using MvcBankingApplication.Models.Notifications;
 
 
 namespace MvcBankingApplication.Controllers
@@ -166,14 +167,14 @@ namespace MvcBankingApplication.Controllers
                     }
                     else if (model.TransactionType == TransactionType.Widthdraw)
                     {
-                        // without approval
+                        if (customerAccount.Balance < model.Amount)
+                        {
+                            errors.Add($"Amount given exceeds account balance. Balance is {customerAccount.Balance}");
+                            return View(model);
+                        }
+
                         if (!shouldBeApproved)
                         {
-                            if (customerAccount.Balance < model.Amount)
-                            {
-                                errors.Add($"Amount given exceeds account balance. Balance is {customerAccount.Balance}");
-                                return View(model);
-                            }
 
                             customerAccount.Balance -= model.Amount;
                             bankCashAccount.Balance += model.Amount;
@@ -191,8 +192,45 @@ namespace MvcBankingApplication.Controllers
                             _context.BankCashAccount.Update(bankCashAccount);
                             await _context.SaveChangesAsync();
                             await transaction.CommitAsync();
-                            return RedirectToAction("", "Cashiers");
                         }
+                        else
+                        {
+                            var pendingTrx = new PendingTransaction
+                            {
+                                CustomerId = customerAccount.CustomerId,
+                                Amount = model.Amount,
+                                AccountCreditedId = customerAccount.Id,
+                                AccountDebitedId = bankCashAccount.Id
+                            };
+                            var cashierNotification = new Notification
+                            {
+                                Message = "Transaction approval request has been successfully submitted. Check your notifications periodically for an approval notification",
+                                Type = NotificationTypes.INFO,
+                                ApplicationUserId = cashier.Id
+                            };
+                            var customerNotification = new Notification
+                            {
+                                Message = "Your withdrawal request is being processed. Check your notifications periodically for completion of the transaction",
+                                Type = NotificationTypes.INFO,
+                                ApplicationUserId = customerAccount.CustomerId
+                            };
+                            var adminNotification = new AdminNotification
+                            {
+                                Message = "A transaction requires your approval. Check the transactions page for the transaction",
+                                Type = NotificationTypes.INFO
+                            };
+
+                            _context.PendingTransactions.Add(pendingTrx);
+                            _context.Notifications.Add(cashierNotification);
+                            _context.Notifications.Add(customerNotification);
+                            _context.AdminNotifications.Add(adminNotification);
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            // notify cashier
+                            TempData["Message"] = "Approval request has been submitted. Check your notifications for an approval";
+                        }
+
+                        return RedirectToAction("", "Cashiers");
 
                         // initiate transaction
                         //   {pending transaction}
