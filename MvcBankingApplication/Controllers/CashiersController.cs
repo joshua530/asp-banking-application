@@ -75,14 +75,14 @@ namespace MvcBankingApplication.Controllers
                 {
                     shouldBeApproved = true;
                 }
-
+                //  TODO record cashier in transaction
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
                     if (bankCashAccount == null)
                     {
                         errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
-                        _logger.LogCritical("bank cash model does not exist");
+                        _logger.LogCritical("bank cash account model does not exist");
                         return View();
                     }
 
@@ -153,6 +153,25 @@ namespace MvcBankingApplication.Controllers
 
                         await transaction.CommitAsync();
                         return RedirectToAction("", "Cashiers");
+                    }
+                    else if (model.TransactionType == TransactionType.Widthdraw)
+                    {
+                        // initiate transaction
+                        //   {pending transaction}
+                        //   - acc to credit
+                        //   - acc to debit
+                        //   - amount
+                        //   - time
+                        // add notification to cashier & customer that the transaction is
+                        // still being processed
+                        // add notification to admin to approve the transaction
+                        // let admin approve the transaction
+                        // once transaction is approved
+                        //   - post the transaction
+                        //   - delete pending transaction
+                        //   - create notifications for cashier and user
+                        // once the transaction goes through, inform both the cashier and
+                        // customer that the transaction went through
                     }
                 }
             }
