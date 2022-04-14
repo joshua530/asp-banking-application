@@ -7,6 +7,7 @@ namespace MvcBankingApplication.Models.Accounts
     public class CustomerAccount : AccountModel
     {
         [DataType(DataType.Currency)]
+        [DisplayFormat(DataFormatString = "{0:0.00}")]
         public double OverdraftLimit { get; set; } = 1000;
 
         [DataType(DataType.Currency)]
