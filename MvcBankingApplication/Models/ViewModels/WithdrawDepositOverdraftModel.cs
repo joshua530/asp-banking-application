@@ -17,7 +17,7 @@ public class WithdrawDepositOverdraftModel
     [Display(Name = "Select transaction type")]
     public TransactionType TransactionType { get; set; }
 
-    [Range(1, 9999999.99)]
+    [Range(1, 9999999.99, ErrorMessage = "amount must be between 1 and 9999999.99")]
     public double Amount { get; set; }
 
     [Display(Name = "Account number")]
