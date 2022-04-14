@@ -75,7 +75,7 @@ namespace MvcBankingApplication.Controllers
                 {
                     shouldBeApproved = true;
                 }
-                //  TODO record cashier in transaction
+
                 using (var transaction = _context.Database.BeginTransaction())
                 {
                     var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
