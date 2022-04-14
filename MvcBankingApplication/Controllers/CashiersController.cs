@@ -98,7 +98,8 @@ namespace MvcBankingApplication.Controllers
                             TransactionType = TransactionTypes.DEBIT,
                             CustomerId = customerAccount.CustomerId,
                             AccountDebitedId = customerAccount.Id,
-                            AccountCreditedId = bankCashAccount.Id
+                            AccountCreditedId = bankCashAccount.Id,
+                            CashierId = cashier.Id
                         };
                         _context.Transactions.Add(trx1);
 
@@ -123,7 +124,8 @@ namespace MvcBankingApplication.Controllers
                                     TransactionType = TransactionTypes.CREDIT,
                                     CustomerId = customerAccount.CustomerId,
                                     AccountDebitedId = bankOverdraftAccount.Id,
-                                    AccountCreditedId = customerAccount.Id
+                                    AccountCreditedId = customerAccount.Id,
+                                    CashierId = cashier.Id
                                 };
                                 _context.Transactions.Add(trx2);
                             }
@@ -141,7 +143,8 @@ namespace MvcBankingApplication.Controllers
                                     TransactionType = TransactionTypes.CREDIT,
                                     CustomerId = customerAccount.CustomerId,
                                     AccountDebitedId = bankOverdraftAccount.Id,
-                                    AccountCreditedId = customerAccount.Id
+                                    AccountCreditedId = customerAccount.Id,
+                                    CashierId = cashier.Id
                                 };
                                 _context.Transactions.Add(trx3);
                             }
