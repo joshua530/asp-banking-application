@@ -51,4 +51,6 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     public DbSet<MvcBankingApplication.Models.Accounts.BankCashAccount> BankCashAccount { get; set; }
 
     public DbSet<MvcBankingApplication.Models.Accounts.BankOverdraftAccount> BankOverdraftAccount { get; set; }
+
+    public DbSet<MvcBankingApplication.Models.Notifications.AdminNotification> AdminNotifications { get; set; }
 }
