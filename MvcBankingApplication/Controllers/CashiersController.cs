@@ -82,13 +82,20 @@ namespace MvcBankingApplication.Controllers
                     if (bankCashAccount == null)
                     {
                         errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
-                        _logger.LogCritical("bank cash account model does not exist");
+                        _logger.LogCritical("bank cash account does not exist");
                         return View();
                     }
 
                     // deposits need no approval
                     if (model.TransactionType == TransactionType.Deposit)
                     {
+                        if (bankCashAccount.Balance < model.Amount)
+                        {
+                            // bank does not have enough cash reserves
+                            errors.Add("The transaction cannot be processed at this time. We have informed our technical team on it. If the error persists, please contact us.");
+                            _logger.LogCritical("Bank cash account does not have enough reserves");
+                            return View(model);
+                        }
                         // add amount to customer account
                         customerAccount.Balance += model.Amount;
                         bankCashAccount.Balance -= model.Amount;
@@ -159,6 +166,34 @@ namespace MvcBankingApplication.Controllers
                     }
                     else if (model.TransactionType == TransactionType.Widthdraw)
                     {
+                        // without approval
+                        if (!shouldBeApproved)
+                        {
+                            if (customerAccount.Balance < model.Amount)
+                            {
+                                errors.Add($"Amount given exceeds account balance. Balance is {customerAccount.Balance}");
+                                return View(model);
+                            }
+
+                            customerAccount.Balance -= model.Amount;
+                            bankCashAccount.Balance += model.Amount;
+                            var trx = new Transaction
+                            {
+                                CashierId = cashier.Id,
+                                CustomerId = customerAccount.CustomerId,
+                                AccountDebitedId = bankCashAccount.Id,
+                                AccountCreditedId = customerAccount.Id,
+                                Amount = model.Amount,
+                                TransactionType = TransactionTypes.CREDIT
+                            };
+                            _context.Transactions.Add(trx);
+                            _context.CustomerAccounts.Update(customerAccount);
+                            _context.BankCashAccount.Update(bankCashAccount);
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            return RedirectToAction("", "Cashiers");
+                        }
+
                         // initiate transaction
                         //   {pending transaction}
                         //   - acc to credit
