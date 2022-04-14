@@ -53,4 +53,6 @@ public class ApplicationContext : IdentityDbContext<ApplicationUser>
     public DbSet<MvcBankingApplication.Models.Accounts.BankOverdraftAccount> BankOverdraftAccount { get; set; }
 
     public DbSet<MvcBankingApplication.Models.Notifications.AdminNotification> AdminNotifications { get; set; }
+
+    public DbSet<MvcBankingApplication.Models.Transactions.PendingTransaction> PendingTransactions { get; set; }
 }
