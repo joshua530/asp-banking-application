@@ -31,8 +31,8 @@
           <div class="form-group">
             <p class="text-white">Your overdraft balance will be recovered on the next deposit into your account. The
               amount already in your account will be part of the recovery</p>
-            <p>Your current overdraft limit is <strong>$@Model.OverdraftLimit</strong></p>
-            <p>Amount already overdrawn is <strong>$@Model.OverdrawnAmount</strong></p>
+            <p>Your current overdraft limit is <strong>@Html.DisplayFor(m => m.OverdraftLimit)</strong></p>
+            <p>Amount already overdrawn is <strong>@Html.DisplayFor(m => m.OverdrawnAmount)</strong></p>
           </div>
           <button type="submit" class="w-100 btn btn-blue mt-3 rounded-0">
             Request Overdraft
