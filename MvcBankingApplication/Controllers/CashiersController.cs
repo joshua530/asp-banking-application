@@ -289,7 +289,8 @@ namespace MvcBankingApplication.Controllers
                                 Amount = model.Amount,
                                 AccountCreditedId = customerAccount.Id,
                                 AccountDebitedId = bankCashAccount.Id,
-                                CashierId = cashier.Id
+                                CashierId = cashier.Id,
+                                TransactionType = TransactionTypes.CREDIT
                             };
                             var cashierNotification = new Notification
                             {
