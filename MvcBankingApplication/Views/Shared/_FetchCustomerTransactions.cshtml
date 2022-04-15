@@ -9,12 +9,12 @@
   var prevLink = ""
   var apiUrl = "/api/transactions/customers"
   var host = new URL(window.location).host
+  var spinner = '<div class="container"><div class="py-3">' +
+    '<i class="fa fa-3x fa-spinner text-white fa-pulse">' +
+    '</i></div></div>';
 
   var paginationBtns = document.querySelectorAll('.btn-pagination')
   for (var btn of paginationBtns) {
-    var spinner = '<div class="container"><div class="py-3">' +
-      '<i class="fa fa-3x fa-spinner text-white fa-pulse">' +
-      '</i></div></div>';
     btn.addEventListener('click', () => {
       transactionsContainer.innerHTML = spinner
     })
@@ -107,7 +107,7 @@
     transactionData.forEach((val, key) => {
       var textClass = "text-green"
       var title = "debit"
-      if (val.TransactionTypeStr == "CR") {
+      if (val.transactionTypeStr == "CR") {
         title = "credit"
         textClass = "text-red"
       }
@@ -115,9 +115,9 @@
       <td>${val['id']}</td>
       <td>${val['accountCreditedId']}</td>
       <td>${val['accountDebitedId']}</td>
-      <td>${val['timeString']}</td>
+      <td>${val['date']}</td>
       <td>${val['amount']}</td>
-      <td class="${textClass}" title="${title}">${val['transactionTypeStr']}</td>
+      <td class="${textClass} fw-bold" title="${title}">${val['transactionTypeStr']}</td>
       </tr>`
       transactions += transaction
     })
