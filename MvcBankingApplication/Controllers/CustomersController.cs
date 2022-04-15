@@ -111,10 +111,11 @@ namespace MvcBankingApplication.Controllers
 
             int page = 1;
             int pageSize = 5;
-            List<Transaction> withoutTypeStr = query.Skip((page - 1) * pageSize)
-                                    .OrderByDescending(t => t.TimeOfTransaction)
+            List<Transaction> withoutTypeStr = query
+                                    .Skip((page - 1) * pageSize)
                                     .Take(pageSize)
-                                    .ToListAsync().GetAwaiter().GetResult();
+                                    .OrderByDescending(t => t.TimeOfTransaction)
+                                    .ToList();
             IEnumerable<TransactionWithTypeStr> transactionsWithTypeStr = AddTypeStrToTransactions(withoutTypeStr, account.Id);
 
             // persist input from the user to search form
