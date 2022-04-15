@@ -1,0 +1,133 @@
+<script>
+  /**
+   * contains javascript pagination logic for staff
+   */
+  var previousButton = document.getElementById("prevBtn")
+  var nextButton = document.getElementById("nextBtn")
+  var transactionsContainer = document.getElementById("transactionsContainer")
+  var nextLink = ""
+  var prevLink = ""
+  var apiUrl = "/api/transactions/staff"
+  var host = new URL(window.location).host
+  var spinner = '<div class="container"><div class="py-3">' +
+    '<i class="fa fa-3x fa-spinner text-white fa-pulse">' +
+    '</i></div></div>';
+
+  var paginationBtns = document.querySelectorAll('.btn-pagination')
+  for (var btn of paginationBtns) {
+    btn.addEventListener('click', () => {
+      transactionsContainer.innerHTML = spinner
+    })
+  }
+
+  window.onload = () => {
+    var url = new URL(window.location)
+    var page = 1
+
+    var hasPage = false
+    var emptyKeys = []
+    // get empty keys
+    url.searchParams.forEach((val, key) => {
+      if (val == undefined || val == null || val == 0 || val.length == 0) {
+        emptyKeys.push(key);
+      } else {
+        if (key == 'page') {
+          hasPage = true
+        }
+      }
+    })
+
+    // remove empty values from query string
+    for (var i = 0; i < emptyKeys.length; ++i) {
+      url.searchParams.delete(emptyKeys[i])
+    }
+
+    if (!hasPage) {
+      url.searchParams.append('page', page)
+    }
+    apiUrl = `${apiUrl}${url.search}`
+    fetchData(apiUrl, false)
+  }
+
+  previousButton.addEventListener('click', () => {
+    if (previousButton.disabled) {
+      return;
+    }
+    if (prevLink.length == 0) {
+      throw new Error('invalid link')
+    }
+    fetchData(prevLink)
+  })
+
+  nextButton.addEventListener('click', () => {
+    if (nextButton.disabled) {
+      return;
+    }
+    if (nextLink.length == 0) {
+      throw new Error('invalid link')
+    }
+    fetchData(nextLink)
+  })
+
+  function fetchData(url, shouldUpdateTransactions = true, shouldUpdateButtons = true) {
+    fetch(url).then(res => {
+      if (res.status != 200)
+        throw new Error(res.statusText)
+      else
+        return res.json()
+    }).then(data => {
+      shouldUpdateButtons && updateButtons(data)
+      shouldUpdateTransactions && fillTransactionData(data)
+    })
+  }
+
+  function updateButtons(data) {
+    var prevBtnData = data['previousLink']
+    var nextBtnData = data['nextLink']
+
+    if (prevBtnData['isActive'] == false) {
+      previousButton.disabled = true
+    } else {
+      previousButton.disabled = false
+    }
+    prevLink = prevBtnData['href']
+
+    if (nextBtnData['isActive'] == false) {
+      nextButton.disabled = true
+    } else {
+      nextButton.disabled = false
+    }
+    nextLink = nextBtnData['href']
+  }
+
+  function fillTransactionData(data) {
+    var transactionData = data['transactions']
+    var transactions = ''
+
+    transactionData.forEach((val, key) => {
+      var textClass = "text-green"
+      var title = "debit"
+      if (val.transactionTypeStr == "CR") {
+        title = "credit"
+        textClass = "text-red"
+      } else if (val.transactionTypeStr == "OVER_D") {
+        textClass = "text-info";
+        title = "overdraft";
+      } else if (val.transactionTypeStr == "WIRE_T") {
+        textClass = "text-light";
+        title = "wire transfer";
+      }
+      transaction = `<tr>
+      <td>${val['id']}</td>
+      <td>${val['date']}</td>
+      <td>${val['amount']}</td>
+      <td class="${textClass} fw-bold" title="${title}">${val['transactionTypeStr']}</td>
+      <td>${val['accountCreditedId']}</td>
+      <td>${val['accountDebitedId']}</td>
+      <td>${val['approvedBy']}</td>
+      </tr>`
+      transactions += transaction
+    })
+    transactionsContainer.innerHTML = transactions
+  }
+</script>
