@@ -45,6 +45,86 @@ namespace MvcBankingApplication.Controllers
             return View();
         }
 
+        private string GetCashierId()
+        {
+            return _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult WireTransfer(CashierWireTransferModel model)
+        {
+            var fromAccount = _context.CustomerAccounts
+                                  .Where(c_a => c_a.Id == model.From)
+                                  .FirstOrDefault();
+            if (fromAccount == null)
+            {
+                ModelState.AddModelError("From", "invalid account number");
+            }
+            var toAccount = _context.CustomerAccounts
+                            .Where(c_a => c_a.Id == model.To)
+                            .FirstOrDefault();
+            if (toAccount == null)
+            {
+                ModelState.AddModelError("To", "invalid account number");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var fatalErrors = new List<string>();
+            ViewData["FatalErrors"] = fatalErrors;
+            if (fromAccount.Balance < model.Amount)
+            {
+                fatalErrors.Add($"Amount requested({model.Amount.ToString("0.00")}) exceeds account balance({fromAccount.Balance.ToString("0.00")})");
+                return View(model);
+            }
+
+            // all cashier wire transfers require validation
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                var cashierId = GetCashierId();
+                var pendingTrx = new PendingTransaction
+                {
+                    Amount = model.Amount,
+                    TransactionType = TransactionTypes.WIRE_TRANSFER,
+                    CustomerId = fromAccount.CustomerId,
+                    CashierId = cashierId,
+                    AccountDebitedId = toAccount.Id,
+                    AccountCreditedId = fromAccount.Id
+                };
+
+                var cashierNotification = new Notification
+                {
+                    Message = "Transaction approval request has been successfully submitted. Check your notifications periodically for an approval notification",
+                    Type = NotificationTypes.INFO,
+                    ApplicationUserId = cashierId
+                };
+                var customerNotification = new Notification
+                {
+                    Message = "Your withdrawal request is being processed. Check your notifications periodically for completion of the transaction",
+                    Type = NotificationTypes.INFO,
+                    ApplicationUserId = fromAccount.CustomerId
+                };
+                var adminNotification = new AdminNotification
+                {
+                    Message = "A transaction requires your approval. Check the transactions page for the transaction",
+                    Type = NotificationTypes.INFO
+                };
+
+                _context.Notifications.Add(cashierNotification);
+                _context.Notifications.Add(customerNotification);
+                _context.Notifications.Add(adminNotification);
+                _context.PendingTransactions.Add(pendingTrx);
+
+                _context.SaveChanges();
+                transaction.Commit();
+                TempData["Message"] = "Transaction approval request has been successfully submitted. Check your notifications periodically for an approval notification";
+                return RedirectToAction("", "Cashiers");
+            }
+        }
+
         public IActionResult WithdrawDepositOverdraft()
         {
             var model = new WithdrawDepositOverdraftModel();
