@@ -52,7 +52,7 @@ namespace MvcBankingApplication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PendingTransactions(int id = -1, string action = null)
         {
-            if (!ModelState.IsValid || id == -1 || action == null)
+            if (!ModelState.IsValid || id < 1 || action == null)
             {
                 return RedirectToAction("PendingTransactions", "Admin");
             }
@@ -81,10 +81,10 @@ namespace MvcBankingApplication.Controllers
                 {
                     var creditAc = FindAccount(pendingTrx.AccountCreditedId);
                     if (creditAc == null)
-                        return RedirectToAction("PendingTransactions", "Admin");
+                        return View();
                     var debitAc = FindAccount(pendingTrx.AccountDebitedId);
                     if (debitAc == null)
-                        return RedirectToAction("PendingTransactions", "Admin");
+                        return View();
 
                     var trx = CopyTransaction(pendingTrx);
                     trx.ApproverId = userId;
@@ -96,7 +96,19 @@ namespace MvcBankingApplication.Controllers
                     {
                         _logger.LogCritical($"account balance of account number {creditAc.Id} is less than {amount}.");
                         TempData["Error"] = $"account balance of account number {creditAc.Id.ToString("D5")} is less than {amount}.";
-                        return RedirectToAction("PendingTransactions", "Admin");
+                        return View();
+                    }
+                    if (pendingTrx.TransactionType == TransactionTypes.OVERDRAFT)
+                    {
+                        var customerAccount = (CustomerAccount)debitAc;
+                        var overdrawableAmount = customerAccount.OverdraftLimit - customerAccount.OverdrawnAmount;
+                        if (pendingTrx.Amount > overdrawableAmount)
+                        {
+                            TempData["Error"] = $"amount provided({pendingTrx.Amount.ToString("0.00")}) exceeds overdrawable amount({overdrawableAmount.ToString("0.00")}).";
+                            return View();
+                        }
+                        customerAccount.OverdrawnAmount += amount;
+                        _context.Update(customerAccount);
                     }
                     creditAc.Balance -= amount;
                     debitAc.Balance += amount;
