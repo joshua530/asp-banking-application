@@ -67,6 +67,10 @@ namespace MvcBankingApplication.Controllers
             CustomerAccount account = FindCustomerAccountByUserId(user.Id);
 
             // normalize max and min amounts
+            if (minAmount < 0)
+            {
+                minAmount = 0;
+            }
             if (maxAmount < minAmount)
             {
                 maxAmount = minAmount;
