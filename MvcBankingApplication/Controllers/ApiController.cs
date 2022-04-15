@@ -33,9 +33,194 @@ public class ApiController : ControllerBase
 
     public class PaginationModel
     {
-        public IEnumerable<CustomerTransactionModel> Transactions { get; set; }
+        public IEnumerable<TransactionViewModel> Transactions { get; set; }
         public PaginationLink PreviousLink { get; set; }
         public PaginationLink NextLink { get; set; }
+    }
+
+    public class StaffPaginationModel : PaginationModel
+    {
+        public new IEnumerable<StaffTransactionModel> Transactions { get; set; }
+    }
+
+    [Authorize(Roles = "admin, cashier")]
+    [HttpGet("api/transactions/staff")]
+    public ActionResult<StaffPaginationModel>
+    StaffTransactions(
+        int key = int.MinValue,
+        int minAmount = int.MinValue,
+        int maxAmount = int.MaxValue,
+        int accountCredited = int.MinValue,
+        int accountDebited = int.MinValue,
+        string dr = null, string cr = null,
+        string approverId = null, int page = 1)
+    {
+
+        // normalize max and min amounts
+        if (minAmount < 0)
+        {
+            minAmount = 0;
+        }
+        if (maxAmount < minAmount)
+        {
+            maxAmount = minAmount;
+        }
+        // find transaction type
+        string trxType = "all";
+        if (dr == "on" && cr == null)
+        {
+            trxType = "debit";
+        }
+        else if (dr == null && cr == "on")
+        {
+            trxType = "credit";
+        }
+
+        var query = _context.Transactions
+                        .Where(
+                            trx => trx.Amount >= minAmount
+                            && trx.Amount <= maxAmount);
+        // if key is set, use it
+        if (key >= 1)
+        {
+            query = query.Where(
+                trx => trx.ID == key
+                || trx.AccountCreditedId == key
+                || trx.AccountDebitedId == key);
+        }
+        // credit and debit accounts
+        if (accountDebited > 0)
+        {
+            query = query.Where(trx => trx.AccountDebitedId == accountDebited);
+        }
+        if (accountCredited > 0)
+        {
+            query = query.Where(trx => trx.AccountCreditedId == accountCredited);
+        }
+        // transaction type
+        if (trxType == "debit")
+        {
+            query = query.Where(trx => trx.TransactionType == TransactionTypes.DEBIT);
+        }
+        else if (trxType == "credit")
+        {
+            query = query.Where(trx => trx.TransactionType == TransactionTypes.CREDIT);
+        }
+        // approver
+        if (approverId != null)
+        {
+            query = query.Where(trx => trx.ApproverId == approverId);
+        }
+
+        if (page < 1)
+            page = 1;
+        int pageSize = 5;
+
+        var transactions = query
+                        .Skip((page - 1) * pageSize)
+                        .OrderByDescending(tr => tr.TimeOfTransaction)
+                        .Take(pageSize)
+                        .ToArray();
+        var toReturn = GetStaffTransactions(transactions);
+
+        // pagination queries
+        var prevPage = query
+                    .Skip((page - 2) * pageSize)
+                    .Take(pageSize);
+        var nextPage = query
+                    .Skip((page) * pageSize)
+                    .Take(pageSize);
+
+        // attempt to construct pagination links
+        var prevLink = new PaginationLink
+        {
+            Href = "",
+            IsActive = false
+        };
+        var nextLink = new PaginationLink
+        {
+            Href = "",
+            IsActive = false
+        };
+
+        // 
+        if (key < 1)
+            key = 0;
+        // previous page
+        // there will be no previous page when we are on the first page
+        if (page > 1)
+        {
+            if (prevPage.Count() != 0)
+            {
+                prevLink.Href = $"/api/transactions/staff" +
+                            $"?page={page - 1}&key={key}" +
+                            $"&minAmount={minAmount}&maxAmount={maxAmount}" +
+                            $"&dr={dr}&cr={cr}&approverId={approverId}" +
+                            $"&accountCredited={accountCredited}" +
+                            $"&accountDebited={accountDebited}";
+                prevLink.IsActive = true;
+            }
+        }
+        // next page
+        if (nextPage.Count() != 0)
+        {
+            nextLink.Href = $"/api/transactions/staff" +
+                        $"?page={page + 1}&key={key}" +
+                        $"&minAmount={minAmount}&maxAmount={maxAmount}" +
+                        $"&dr={dr}&cr={cr}&approverId={approverId}" +
+                        $"&accountCredited={accountCredited}" +
+                        $"&accountDebited={accountDebited}";
+            nextLink.IsActive = true;
+        }
+
+        var paginationModel = new StaffPaginationModel
+        {
+            Transactions = toReturn,
+            NextLink = nextLink,
+            PreviousLink = prevLink
+        };
+        return paginationModel;
+    }
+
+    private List<StaffTransactionModel> GetStaffTransactions(
+        IEnumerable<Transaction> transactions)
+    {
+        List<StaffTransactionModel> staffTransactions = new List<StaffTransactionModel>();
+        foreach (var trx in transactions)
+        {
+            string approver = trx.ApproverId ?? "N/A";
+            staffTransactions.Add(
+                new StaffTransactionModel
+                {
+                    Id = trx.ID,
+                    Date = trx.TimeOfTransaction.ToString("dd MMMM, yyyy"),
+                    Amount = trx.Amount,
+                    TransactionTypeStr = GetTransactionTypeString(trx.TransactionType),
+                    AccountCreditedId = trx.AccountCreditedId,
+                    AccountDebitedId = trx.AccountDebitedId,
+                    ApprovedBy = approver
+                }
+            );
+        }
+        return staffTransactions;
+    }
+
+    private string GetTransactionTypeString(TransactionTypes type)
+    {
+        string trxType = "DR";
+        switch (type)
+        {
+            case (TransactionTypes.CREDIT):
+                trxType = "CR";
+                break;
+            case (TransactionTypes.WIRE_TRANSFER):
+                trxType = "WIRE_T";
+                break;
+            case (TransactionTypes.OVERDRAFT):
+                trxType = "OVER_D";
+                break;
+        }
+        return trxType;
     }
 
     [Authorize(Roles = "customer")]
@@ -140,21 +325,13 @@ public class ApiController : ControllerBase
         foreach (var trx in transactionList)
         {
             string transactionType = "DR";
-            switch (trx.TransactionType)
-            {
-                case TransactionTypes.CREDIT:
-                    transactionType = "CR";
-                    break;
-                case TransactionTypes.WIRE_TRANSFER:
-                    if (trx.AccountCreditedId == account.Id)
-                        transactionType = "CR";
-                    break;
-            }
+            if (trx.AccountCreditedId == account.Id)
+                transactionType = "CR";
 
             toReturn.Add(new CustomerTransactionModel
             {
                 Amount = trx.Amount,
-                TimeString = FormatDate(trx.TimeOfTransaction),
+                Date = FormatDate(trx.TimeOfTransaction),
                 Id = trx.ID,
                 TransactionTypeStr = transactionType,
                 AccountCreditedId = trx.AccountCreditedId,
