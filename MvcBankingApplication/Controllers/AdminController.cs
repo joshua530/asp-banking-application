@@ -81,10 +81,10 @@ namespace MvcBankingApplication.Controllers
                 {
                     var creditAc = FindAccount(pendingTrx.AccountCreditedId);
                     if (creditAc == null)
-                        return View();
+                        return RedirectToAction("PendingTransactions", "Admin");
                     var debitAc = FindAccount(pendingTrx.AccountDebitedId);
                     if (debitAc == null)
-                        return View();
+                        return RedirectToAction("PendingTransactions", "Admin");
 
                     var trx = CopyTransaction(pendingTrx);
                     trx.ApproverId = userId;
@@ -96,7 +96,7 @@ namespace MvcBankingApplication.Controllers
                     {
                         _logger.LogCritical($"account balance of account number {creditAc.Id} is less than {amount}.");
                         TempData["Error"] = $"account balance of account number {creditAc.Id.ToString("D5")} is less than {amount}.";
-                        return View();
+                        return RedirectToAction("PendingTransactions", "Admin");
                     }
                     if (pendingTrx.TransactionType == TransactionTypes.OVERDRAFT)
                     {
@@ -105,7 +105,7 @@ namespace MvcBankingApplication.Controllers
                         if (pendingTrx.Amount > overdrawableAmount)
                         {
                             TempData["Error"] = $"amount provided({pendingTrx.Amount.ToString("0.00")}) exceeds overdrawable amount({overdrawableAmount.ToString("0.00")}).";
-                            return View();
+                            return RedirectToAction("PendingTransactions", "Admin");
                         }
                         customerAccount.OverdrawnAmount += amount;
                         _context.Update(customerAccount);
