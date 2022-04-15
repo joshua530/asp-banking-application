@@ -79,17 +79,17 @@ namespace MvcBankingApplication.Controllers
 
                 using (var transaction = _context.Database.BeginTransaction())
                 {
-                    var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
-                    if (bankCashAccount == null)
-                    {
-                        errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
-                        _logger.LogCritical("bank cash account does not exist");
-                        return View();
-                    }
-
                     // deposits need no approval
                     if (model.TransactionType == TransactionType.Deposit)
                     {
+                        var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
+                        if (bankCashAccount == null)
+                        {
+                            errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
+                            _logger.LogCritical("bank cash account does not exist");
+                            return View();
+                        }
+
                         if (bankCashAccount.Balance < model.Amount)
                         {
                             // bank does not have enough cash reserves
@@ -167,6 +167,14 @@ namespace MvcBankingApplication.Controllers
                     }
                     else if (model.TransactionType == TransactionType.Widthdraw)
                     {
+                        var bankCashAccount = _context.BankCashAccount.FirstOrDefault();
+                        if (bankCashAccount == null)
+                        {
+                            errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
+                            _logger.LogCritical("bank cash account does not exist");
+                            return View();
+                        }
+
                         if (customerAccount.Balance < model.Amount)
                         {
                             errors.Add($"Amount given exceeds account balance. Balance is {customerAccount.Balance}");
@@ -232,23 +240,86 @@ namespace MvcBankingApplication.Controllers
                         }
 
                         return RedirectToAction("", "Cashiers");
+                    }
+                    else if (model.TransactionType == TransactionType.Overdraft)
+                    {
+                        var bankOverdraftAccount = _context.BankOverdraftAccount.FirstOrDefault();
+                        if (bankOverdraftAccount == null)
+                        {
+                            errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
+                            _logger.LogCritical("bank overdraft account does not exist");
+                            return View();
+                        }
+                        if (!shouldBeApproved)
+                        {
+                            if (bankOverdraftAccount.Balance < model.Amount)
+                            {
+                                _logger.LogCritical("Bank overdraft account does not have enough reserves for this transaction");
+                                errors.Add("Your transaction cannot be processed at this time. If the error persists, contact us");
+                                return View();
+                            }
+                            if (model.Amount > customerAccount.OverdraftLimit)
+                            {
+                                errors.Add($"Amount requested exceeds the overdraft limit of the account {customerAccount.Id.ToString("D5")}. Current overdraft limit is {customerAccount.OverdraftLimit.ToString("0.00")}");
+                                return View();
+                            }
+                            bankOverdraftAccount.Balance -= model.Amount;
+                            customerAccount.Balance += model.Amount;
+                            customerAccount.OverdrawnAmount += model.Amount;
+                            var trx = new Transaction
+                            {
+                                Amount = model.Amount,
+                                AccountDebitedId = customerAccount.Id,
+                                AccountCreditedId = bankOverdraftAccount.Id,
+                                TransactionType = TransactionTypes.DEBIT,
+                                CustomerId = customerAccount.CustomerId,
+                                CashierId = cashier.Id
+                            };
+                            _context.Transactions.Add(trx);
+                            _context.CustomerAccounts.Update(customerAccount);
+                            _context.BankOverdraftAccount.Update(bankOverdraftAccount);
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                        }
+                        else
+                        {
+                            var pendingTrx = new PendingTransaction
+                            {
+                                CustomerId = customerAccount.CustomerId,
+                                Amount = model.Amount,
+                                AccountDebitedId = customerAccount.Id,
+                                AccountCreditedId = bankOverdraftAccount.Id,
+                                CashierId = cashier.Id,
+                                TransactionType = TransactionTypes.OVERDRAFT
+                            };
+                            var cashierNotification = new Notification
+                            {
+                                Message = "Transaction approval request has been successfully submitted. Check your notifications periodically for an approval notification",
+                                Type = NotificationTypes.INFO,
+                                ApplicationUserId = cashier.Id
+                            };
+                            var customerNotification = new Notification
+                            {
+                                Message = "Your withdrawal request is being processed. Check your notifications periodically for completion of the transaction",
+                                Type = NotificationTypes.INFO,
+                                ApplicationUserId = customerAccount.CustomerId
+                            };
+                            var adminNotification = new AdminNotification
+                            {
+                                Message = "A transaction requires your approval. Check the transactions page for the transaction",
+                                Type = NotificationTypes.INFO
+                            };
 
-                        // initiate transaction
-                        //   {pending transaction}
-                        //   - acc to credit
-                        //   - acc to debit
-                        //   - amount
-                        //   - time
-                        // add notification to cashier & customer that the transaction is
-                        // still being processed
-                        // add notification to admin to approve the transaction
-                        // let admin approve the transaction
-                        // once transaction is approved
-                        //   - post the transaction
-                        //   - delete pending transaction
-                        //   - create notifications for cashier and user
-                        // once the transaction goes through, inform both the cashier and
-                        // customer that the transaction went through
+                            _context.PendingTransactions.Add(pendingTrx);
+                            _context.Notifications.Add(cashierNotification);
+                            _context.Notifications.Add(customerNotification);
+                            _context.AdminNotifications.Add(adminNotification);
+                            await _context.SaveChangesAsync();
+                            await transaction.CommitAsync();
+                            // notify cashier
+                            TempData["Message"] = "Approval request has been submitted. Check your notifications for an approval";
+                        }
+                        return RedirectToAction("", "Cashiers");
                     }
                 }
             }
