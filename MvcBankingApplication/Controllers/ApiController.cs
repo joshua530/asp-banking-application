@@ -121,8 +121,8 @@ public class ApiController : ControllerBase
 
         var transactions = query
                         .Skip((page - 1) * pageSize)
-                        .OrderByDescending(tr => tr.TimeOfTransaction)
                         .Take(pageSize)
+                        .OrderByDescending(tr => tr.TimeOfTransaction)
                         .ToArray();
         var toReturn = GetStaffTransactions(transactions);
 
