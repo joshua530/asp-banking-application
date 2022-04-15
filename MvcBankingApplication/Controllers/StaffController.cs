@@ -44,16 +44,6 @@ public class StaffController : Controller
         {
             maxAmount = minAmount;
         }
-        // find transaction type
-        string trxType = "all";
-        if (dr == "on" && cr == null)
-        {
-            trxType = "debit";
-        }
-        else if (dr == null && cr == "on")
-        {
-            trxType = "credit";
-        }
 
         Func<Transaction, bool> meetsTransactionCriteria = (tr) =>
         {
@@ -96,15 +86,7 @@ public class StaffController : Controller
         {
             query = query.Where(trx => trx.AccountCreditedId == accountCredited);
         }
-        // transaction type
-        if (trxType == "debit")
-        {
-            query = query.Where(trx => trx.TransactionType == TransactionTypes.DEBIT || trx.TransactionType == TransactionTypes.WIRE_TRANSFER || trx.TransactionType == TransactionTypes.OVERDRAFT);
-        }
-        else if (trxType == "credit")
-        {
-            query = query.Where(trx => trx.TransactionType == TransactionTypes.CREDIT || trx.TransactionType == TransactionTypes.WIRE_TRANSFER || trx.TransactionType == TransactionTypes.OVERDRAFT);
-        }
+
         // approver
         if (approverId != null)
         {
