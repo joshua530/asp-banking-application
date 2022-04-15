@@ -53,7 +53,8 @@ public class ApiController : ControllerBase
         int accountCredited = int.MinValue,
         int accountDebited = int.MinValue,
         string dr = null, string cr = null,
-        string approverId = null, int page = 1)
+        string approverId = null, int page = 1,
+        string over_d = null, string wire_t = null)
     {
 
         // normalize max and min amounts
@@ -65,18 +66,28 @@ public class ApiController : ControllerBase
         {
             maxAmount = minAmount;
         }
-        // find transaction type
-        string trxType = "all";
-        if (dr == "on" && cr == null)
+
+
+        Func<Transaction, bool> matchesTransactionType = (t) =>
         {
-            trxType = "debit";
-        }
-        else if (dr == null && cr == "on")
-        {
-            trxType = "credit";
-        }
+            // there is no explicit transaction type chosen
+            if (dr == null && cr == null && over_d == null && wire_t == null)
+                return true;
+
+            if (dr == "on" && t.TransactionType == TransactionTypes.DEBIT)
+                return true;
+            if (cr == "on" && t.TransactionType == TransactionTypes.CREDIT)
+                return true;
+            if (over_d == "on" && t.TransactionType == TransactionTypes.OVERDRAFT)
+                return true;
+            if (wire_t == "on" && t.TransactionType == TransactionTypes.WIRE_TRANSFER)
+                return true;
+
+            return false;
+        };
 
         var query = _context.Transactions
+                        .Where(matchesTransactionType)
                         .Where(
                             trx => trx.Amount >= minAmount
                             && trx.Amount <= maxAmount);
@@ -97,15 +108,7 @@ public class ApiController : ControllerBase
         {
             query = query.Where(trx => trx.AccountCreditedId == accountCredited);
         }
-        // transaction type
-        if (trxType == "debit")
-        {
-            query = query.Where(trx => trx.TransactionType == TransactionTypes.DEBIT);
-        }
-        else if (trxType == "credit")
-        {
-            query = query.Where(trx => trx.TransactionType == TransactionTypes.CREDIT);
-        }
+
         // approver
         if (approverId != null)
         {
@@ -156,6 +159,7 @@ public class ApiController : ControllerBase
                             $"?page={page - 1}&key={key}" +
                             $"&minAmount={minAmount}&maxAmount={maxAmount}" +
                             $"&dr={dr}&cr={cr}&approverId={approverId}" +
+                            $"&over_d={over_d}&wire_t={wire_t}" +
                             $"&accountCredited={accountCredited}" +
                             $"&accountDebited={accountDebited}";
                 prevLink.IsActive = true;
@@ -168,6 +172,7 @@ public class ApiController : ControllerBase
                         $"?page={page + 1}&key={key}" +
                         $"&minAmount={minAmount}&maxAmount={maxAmount}" +
                         $"&dr={dr}&cr={cr}&approverId={approverId}" +
+                        $"&over_d={over_d}&wire_t={wire_t}" +
                         $"&accountCredited={accountCredited}" +
                         $"&accountDebited={accountDebited}";
             nextLink.IsActive = true;
