@@ -1,37 +1,44 @@
 @model IEnumerable<MvcBankingApplication.Models.Notifications.Notification>
 
+@using MvcBankingApplication.Models.Notifications
+
 @{
-  ViewData["Title"] = "Index";
+  ViewData["Title"] = "Notifications";
 }
 
 <div class="bg-dark">
+  <div class="text-center pt-5 pb-2">
+    <h2 class="text-white">@ViewData["Title"]</h2>
+  </div>
   <div class="container d-flex justify-content-center flex-wrap pb-5">
-    <h2 class="mt-5 text-white">Notifications</h2>
     <div class="mt-3 d-flex flex-wrap justify-content-center">
-      <div class="alert alert-danger rounded-0 my-1">
-        <div class="d-flex">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum fuga placeat praesentium!</p>
-          <i class="fas fa-times fa-2x ms-2 notification-closer"></i>
-        </div>
-      </div>
-      <div class="alert alert-info rounded-0 my-1">
-        <div class="d-flex">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum fuga placeat praesentium!</p>
-          <i class="fas fa-times fa-2x ms-2 notification-closer"></i>
-        </div>
-      </div>
-      <div class="alert alert-success rounded-0 my-1">
-        <div class="d-flex">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum fuga placeat praesentium!</p>
-          <i class="fas fa-times fa-2x ms-2 notification-closer"></i>
-        </div>
-      </div>
-      <div class="alert alert-warning rounded-0 my-1">
-        <div class="d-flex">
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum fuga placeat praesentium!</p>
-          <i class="fas fa-times fa-2x ms-2 notification-closer"></i>
-        </div>
+      <div>
+        @foreach (var notification in Model)
+        {
+          string alertClass = "";
+          if (notification.Type == NotificationTypes.SUCCESS)
+            alertClass = "alert-success";
+          else if (notification.Type == NotificationTypes.DANGER)
+            alertClass = "alert-danger";
+          else if (notification.Type == NotificationTypes.INFO)
+            alertClass = "alert-info";
+          else if (notification.Type == NotificationTypes.WARNING)
+            alertClass = "alert-warning";
+
+          <div class="alert @alertClass rounded-0 my-1">
+            <div class="d-flex justify-content-between">
+              <p>@notification.Message</p>
+              <form method="post" asp-controller="Notifications" asp-action="Delete" class="form-inline">
+                <input type="hidden" name="id" value="@notification.Id">
+                <button class="btn">
+                  <i class="fas fa-times fa-2x ms-2 notification-closer"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        }
       </div>
     </div>
   </div>
+</div>
 </div>
