@@ -1,0 +1,21 @@
+@using MvcBankingApplication.Models.Notifications
+@using MvcBankingApplication.Models.Users
+@using Microsoft.AspNetCore.Identity
+
+@inject ApplicationContext ApplicationContext
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+  bool isAdmin = User.IsInRole("admin");
+  string userId = UserManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
+  var numNotifications = ApplicationContext.Notifications.Where(n => n.ApplicationUserId == userId).Count();
+  if (isAdmin)
+  {
+    numNotifications += ApplicationContext.AdminNotifications.Where(n => true).Count();
+  }
+}
+
+<a class="nav-link text-white" href="#" title="You have @numNotifications notifications">
+  <i class="fa-solid fa-bell fa-2x"></i>
+  <sup>@numNotifications</sup>
+</a>

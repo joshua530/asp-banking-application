@@ -12,10 +12,7 @@
     var userId = user.Id;
 
     <li class="nav-item pe-3">
-      <a class="nav-link text-white" href="#" title="You have 3 notifications">
-        <i class="fa-solid fa-bell fa-2x"></i>
-        <sup>3</sup>
-      </a>
+      <partial name="_NotificationsPartial" />
     </li>
     <li class="nav-item dropdown">
       <a title="@UserManager.GetUserName(User)" class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
