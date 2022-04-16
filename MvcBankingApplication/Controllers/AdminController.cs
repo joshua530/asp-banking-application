@@ -465,7 +465,32 @@ namespace MvcBankingApplication.Controllers
 
         public IActionResult UpdateCashierLimit()
         {
-            return View();
+            var model = new CashierLimitModel { };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCashierLimit(CashierLimitModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            // cashier exists?
+            var cashier = _context.Cashiers
+                            .Where(c => c.Id == model.CashierId)
+                            .FirstOrDefault();
+            if (cashier == null)
+            {
+                ModelState.AddModelError("", "invalid cashier id provided");
+                return View(model);
+            }
+            cashier.TransactionLimit = model.NewLimit;
+            _context.Update(cashier);
+            await _context.SaveChangesAsync();
+            TempData["Message"] = "cashier limit updated successfully";
+            return RedirectToAction("", "Admin");
         }
     }
 }
