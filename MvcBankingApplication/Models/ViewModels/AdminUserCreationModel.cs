@@ -2,7 +2,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MvcBankingApplication.Models.ViewModels;
 
-public class AdminCreationModel
+/// <summary>
+/// used when admin is creating a user(admin or cashier)
+/// </summary>
+public class AdminUserCreationModel
 {
     [Required]
     [MinLength(3), MaxLength(20)]
