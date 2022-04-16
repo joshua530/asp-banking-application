@@ -20,6 +20,7 @@
               <div class="card-body p-md-5 text-black">
                 <h3 class="mb-5 text-uppercase">@ViewData["Title"]</h3>
                 <form id="account" method="post">
+                  <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                   <div class="form-outline mb-4">
                     <input asp-for="Input.UserName" class="form-control form-control-lg" autocomplete="username"
                       aria-required="true" />
