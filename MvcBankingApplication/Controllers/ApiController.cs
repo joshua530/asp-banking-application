@@ -38,9 +38,32 @@ public class ApiController : ControllerBase
         public PaginationLink NextLink { get; set; }
     }
 
+    public class NotificationCountModel
+    {
+        public int NumNotifications { get; set; }
+    }
+
     public class StaffPaginationModel : PaginationModel
     {
         public new IEnumerable<StaffTransactionModel> Transactions { get; set; }
+    }
+
+    [Authorize]
+    [HttpGet("api/notifications")]
+    public ActionResult<NotificationCountModel> Notifications()
+    {
+        string userId = _userManager.GetUserAsync(User).GetAwaiter().GetResult().Id;
+        int numNotifications = _context.Notifications.Where(n => n.ApplicationUserId == userId).Count();
+        if (User.IsInRole("admin"))
+        {
+            // if admin, get all notifications belonging to admins
+            numNotifications += _context.AdminNotifications.Count(n => true);
+        }
+        var notificationCount = new NotificationCountModel
+        {
+            NumNotifications = numNotifications
+        };
+        return notificationCount;
     }
 
     [Authorize(Roles = "admin, cashier")]
