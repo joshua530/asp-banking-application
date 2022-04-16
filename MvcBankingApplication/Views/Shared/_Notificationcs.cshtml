@@ -1,0 +1,23 @@
+<script>
+  const fetchNotifications = () => {
+    var notificationsEndpoint = '/api/notifications'
+    fetch(notificationsEndpoint)
+      .then(res => {
+        if (res.status != 200) {
+          console.log('error occured while fetching notifications')
+        } else {
+          return res.json()
+        }
+      })
+      .then(data => {
+        console.log(data)
+        // change the number on the notifications
+        // make the number pop up(a notification popup alongise the bell)
+        // make the number pulse on changing
+      })
+
+  }
+  window.onload = () => {
+    // set up pulse function to fire after every 10 seconds
+  }
+</script>
