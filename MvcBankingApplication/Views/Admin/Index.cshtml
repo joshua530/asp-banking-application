@@ -8,6 +8,10 @@
   <div class="container text-white">
     <hr>
     <section class="my-5">
+      @if (TempData["Message"] != null)
+      {
+        <p class="text-light alert alert-success mb-2">@TempData["Message"]</p>
+      }
       <h2>Choose one action below</h2>
       <ul>
         <li>
@@ -23,7 +27,7 @@
           <a asp-action="Transactions" asp-controller="Staff" class="site-link">View transactions</a>
         </li>
         <li>
-          <a href="overdraft.html" class="site-link">Update cashier limit</a>
+          <a asp-controller="Admin" asp-action="UpdateCashierLimit" class="site-link">Update cashier limit</a>
         </li>
       </ul>
     </section>
