@@ -36,16 +36,15 @@ namespace MvcBankingApplication.Controllers
             return View();
         }
 
-        // GET: Admin/Create
-        public IActionResult CreateAdmin()
+        public IActionResult CreateCashier()
         {
-            var model = new AdminCreationModel { };
+            var model = new AdminUserCreationModel { };
             return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateAdmin(AdminCreationModel model)
+        public async Task<IActionResult> CreateCashier(AdminUserCreationModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -66,7 +65,64 @@ namespace MvcBankingApplication.Controllers
                 return View(model);
             }
 
-            Admin admin = CreateUser();
+            Cashier cashier = InstantiateCashier();
+            cashier.UserName = model.Username;
+            cashier.Email = model.Email;
+
+            cashier.FirstName = model.Username;
+            cashier.LastName = model.Username;
+            cashier.EmailConfirmed = true;
+            cashier.TransactionLimit = 10000;
+
+            string password = GeneratePassword();
+            var userCreation = await _userManager.CreateAsync(cashier, password);
+
+            if (userCreation.Succeeded)
+            {
+                _logger.LogInformation(String.Format($"Created cashier id {0}", cashier.Id));
+                await _userManager.AddToRoleAsync(cashier, "cashier");
+                // user should reset password after this to gain access to their account
+            }
+            else
+            {
+                ModelState.AddModelError("", "User creation failed");
+                return View(model);
+            }
+            return RedirectToAction("", "Admin");
+        }
+
+        public IActionResult CreateAdmin()
+        {
+            var model = new AdminUserCreationModel { };
+            return View(model);
+        }
+
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAdmin(AdminUserCreationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var userWithEmail = UserWithEmail(model.Email);
+            if (userWithEmail != null)
+            {
+                ModelState.AddModelError("Email", "that email has already been taken. Try another one");
+            }
+            var userWithUsername = UserWithUsername(model.Username);
+            if (userWithUsername != null)
+            {
+                ModelState.AddModelError("Username", "that username has already been taken. Try another one");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            Admin admin = InstantiateAdmin();
             admin.UserName = model.Username;
             admin.Email = model.Email;
 
@@ -91,7 +147,7 @@ namespace MvcBankingApplication.Controllers
             return RedirectToAction("", "Admin");
         }
 
-        private Admin CreateUser()
+        private Admin InstantiateAdmin()
         {
             try
             {
@@ -105,6 +161,24 @@ namespace MvcBankingApplication.Controllers
             }
         }
 
+        private Cashier InstantiateCashier()
+        {
+            try
+            {
+                return Activator.CreateInstance<Cashier>();
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(Cashier)}'. " +
+                    $"Ensure that '{nameof(Cashier)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+            }
+        }
+
+        /// <summary>
+        /// generates a random password that conforms to password policies
+        /// each time it is called
+        /// </summary>
         private string GeneratePassword()
         {
             IDictionary<string, char[]> charClasses = GeneratePasswordCharacters();
@@ -387,11 +461,6 @@ namespace MvcBankingApplication.Controllers
             if (bankOverdraftAccount != null)
                 return bankOverdraftAccount;
             return null;
-        }
-
-        public IActionResult CreateCashier()
-        {
-            return View();
         }
 
         public IActionResult UpdateCashierLimit()
