@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using MvcBankingApplication.Models.Users;
 using MvcBankingApplication.Models.Accounts;
+using MvcBankingApplication.Models.ViewModels;
 
 
 namespace MvcBankingApplication.Controllers
@@ -16,15 +17,18 @@ namespace MvcBankingApplication.Controllers
         private readonly ApplicationContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<AdminController> _logger;
+        private readonly IUserStore<ApplicationUser> _userStore;
 
         public AdminController(
             ApplicationContext context,
             UserManager<ApplicationUser> manager,
-            ILogger<AdminController> logger)
+            ILogger<AdminController> logger,
+            IUserStore<ApplicationUser> userStore)
         {
             _logger = logger;
             _context = context;
             _userManager = manager;
+            _userStore = userStore;
         }
 
         public IActionResult Index()
@@ -35,7 +39,203 @@ namespace MvcBankingApplication.Controllers
         // GET: Admin/Create
         public IActionResult CreateAdmin()
         {
-            return View();
+            var model = new AdminCreationModel { };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAdmin(AdminCreationModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var userWithEmail = UserWithEmail(model.Email);
+            if (userWithEmail != null)
+            {
+                ModelState.AddModelError("Email", "that email has already been taken. Try another one");
+            }
+            var userWithUsername = UserWithUsername(model.Username);
+            if (userWithUsername != null)
+            {
+                ModelState.AddModelError("Username", "that username has already been taken. Try another one");
+            }
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            Admin admin = CreateUser();
+            admin.UserName = model.Username;
+            admin.Email = model.Email;
+
+            admin.FirstName = model.Username;
+            admin.LastName = model.Username;
+            admin.EmailConfirmed = true;
+
+            string password = GeneratePassword();
+            var userCreation = await _userManager.CreateAsync(admin, password);
+
+            if (userCreation.Succeeded)
+            {
+                _logger.LogInformation(String.Format($"Created admin id {0}", admin.Id));
+                await _userManager.AddToRoleAsync(admin, "admin");
+                // user should reset password after this to gain access to their account
+            }
+            else
+            {
+                ModelState.AddModelError("", "User creation failed");
+                return View(model);
+            }
+            return RedirectToAction("", "Admin");
+        }
+
+        private Admin CreateUser()
+        {
+            try
+            {
+                return Activator.CreateInstance<Admin>();
+            }
+            catch
+            {
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(Admin)}'. " +
+                    $"Ensure that '{nameof(Admin)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
+            }
+        }
+
+        private string GeneratePassword()
+        {
+            IDictionary<string, char[]> charClasses = GeneratePasswordCharacters();
+            string[] types = { "lower", "upper", "int", "special" };
+
+            // the password is divided into four regions. each of the regions
+            // should contain at least two characters with the second class
+            // containing only two characters
+            // the maximum number of characters that each region can contain is
+            // four
+            // | 0 | 1 | 2 | 3 |
+            string password = "";
+            // ensure the character types occupying each region are selected randomly
+            int[] charClassIndices = GenerateRandomIntArray(0, 3, 4);
+            for (int i = 0; i < 4; ++i)
+            {
+                int currentPosIndex = charClassIndices[i];
+                // get the type of character that will occupy the current region
+                string charClass = types[currentPosIndex];
+                char[] chars = charClasses[charClass];
+                int[] randomIndices;
+                int lastIndex = chars.Length - 1;
+
+                // indices for second region
+                if (i == 1)
+                {
+                    randomIndices = GenerateRandomIntArray(0, lastIndex, 2);
+                }
+                else
+                {
+                    int numCharsForRegion = new Random().Next(2, 4);
+                    randomIndices = GenerateRandomIntArray(0, 4, numCharsForRegion);
+                }
+                foreach (int j in randomIndices)
+                {
+                    password += chars[j];
+                }
+            }
+            return password;
+        }
+
+        private Dictionary<string, char[]> GeneratePasswordCharacters()
+        {
+            Dictionary<string, char[]> passwordChars = new Dictionary<string, char[]>();
+            passwordChars.Add(
+                "lower",
+                new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' }
+            );
+            passwordChars.Add(
+                "upper",
+                new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' }
+            );
+            passwordChars.Add(
+                "int",
+                new char[] { '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' }
+            );
+            passwordChars.Add("special", new char[] { '@', '#', '$', '-', '=', '/', '*', '!', '?', '~' });
+            return passwordChars;
+        }
+
+        /// <summary>
+        /// generates a list of random numbers without repeating
+        /// </summary>
+        /// <param name="start">minimum value to include in list</param>
+        /// <param name="end">maximum value to include in list</param>
+        private int[] GenerateRandomIntArray(int start, int end, int count)
+        {
+            int possibleListLen = (end - start) + 1;
+            // if possibly generated list length is less than the required number
+            // of items, return empty array since the required list will never
+            // be generated. the while loops below will run forever if this is
+            // not done
+            if (possibleListLen < count)
+            {
+                return new int[] { };
+            }
+
+            List<int> generated = new List<int>();
+            Random rand = new Random();
+
+            while (generated.Count() < count)
+            {
+                int genInt = rand.Next(start, end + 1);
+                // is generated number in the list of already generated numbers?
+                while (generated.Contains(genInt))
+                {
+                    genInt = rand.Next(start, end);
+                }
+                generated.Add(genInt);
+            }
+            return generated.ToArray();
+        }
+
+        private ApplicationUser UserWithEmail(string email)
+        {
+            var admin = _context.Admins
+                        .Where(user => user.Email == email)
+                        .FirstOrDefault();
+            if (admin != null)
+                return admin;
+            var cashier = _context.Cashiers
+                            .Where(user => user.Email == email)
+                            .FirstOrDefault();
+            if (cashier != null)
+                return cashier;
+            var customer = _context.Customers
+                            .Where(user => user.Email == email)
+                            .FirstOrDefault();
+            if (customer != null)
+                return customer;
+            return null;
+        }
+
+        private ApplicationUser UserWithUsername(string username)
+        {
+            var admin = _context.Admins
+                        .Where(user => user.UserName == username)
+                        .FirstOrDefault();
+            if (admin != null)
+                return admin;
+            var cashier = _context.Cashiers
+                            .Where(user => user.UserName == username)
+                            .FirstOrDefault();
+            if (cashier != null)
+                return cashier;
+            var customer = _context.Customers
+                            .Where(user => user.UserName == username)
+                            .FirstOrDefault();
+            if (customer != null)
+                return customer;
+            return null;
         }
 
         public IActionResult PendingTransactions()
