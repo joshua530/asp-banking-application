@@ -1,8 +1,11 @@
 <script>
-  int failCount = 0;
+  var failCount = 0;
   var intervalId;
+  var numNotificationsContainer = document.querySelector('#numNotificationsDisplay')
+  var notificationContainer = document.querySelector('#notificationsContainer')
 
   const fetchNotifications = () => {
+    var currentNumNotifications = numNotificationsContainer.textContent
     var notificationsEndpoint = '/api/notifications'
     fetch(notificationsEndpoint)
       .then(res => {
@@ -15,14 +18,15 @@
         }
       })
       .then(data => {
-        console.log(data)
-        // change the number on the notifications
-        // make the number pop up(a notification popup alongise the bell)
-        // make the number pulse on changing
+        var fetchedNum = data.numNotifications
+        numNotificationsContainer.textContent = fetchedNum
+        notificationContainer.title = `You have ${fetchedNum} notifications`
+        if (fetchedNum === 0)
+          notificationContainer.title = `You don't have any notifications`
       })
 
   }
   window.onload = () => {
-    intervalId = setInterval(fetchNotifications, 10000);
+    intervalId = setInterval(fetchNotifications, 30000);
   }
 </script>
