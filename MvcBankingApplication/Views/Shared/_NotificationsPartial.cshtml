@@ -13,12 +13,17 @@
   {
     numNotifications += ApplicationContext.AdminNotifications.Where(n => true).Count();
   }
+  var notificationMessage = $"You have {numNotifications} notifications";
+  if (numNotifications == 0)
+  {
+    notificationMessage = "You don't have any notifications";
+  }
 }
 
-<a class="nav-link text-white" asp-controller="Notifications" asp-action=""
-  title="You have @numNotifications notifications">
+<a id="notificationsContainer" class="nav-link text-white" asp-controller="Notifications" asp-action=""
+  title="@notificationMessage">
   <i class="fa-solid fa-bell fa-2x"></i>
-  <sup>@numNotifications</sup>
+  <sup id="numNotificationsDisplay">@numNotifications</sup>
 </a>
 
 @section Scripts {
