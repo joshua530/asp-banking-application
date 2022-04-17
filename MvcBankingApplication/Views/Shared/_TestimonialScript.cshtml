@@ -1,0 +1,61 @@
+<script>
+  var testimonialApiUrl = 'https://testimonialapi.toolcarton.com/api'
+  var testimonialsContainer = document.getElementById('testimonialsContainer')
+
+  window.onload = () => {
+    testimonialsContainer.innerHTML =
+      '<div class="fa-3x mr-auto"><i class="fas fa-spinner fa-spin fa-pulse"></i></div>'
+    fetch(testimonialApiUrl)
+      .then(res => {
+        if (res.status != 200 && res.status != 304) {
+          console.log(res.status)
+          return Promise.reject('error fetching data')
+        }
+        else
+          return res.json()
+      })
+      .then(data => {
+        var testimonialIndices = generateRandomInts(0, 9, 4)
+        console.log(testimonialIndices)
+        var testimonialContent = ''
+        for (var index of testimonialIndices) {
+          var testimonial = data[index]
+          testimonialContent +=
+            `<div class="col-9 col-md-5 col-lg-4 testimonial d-flex flex-column align-items-between">
+              <p class="testimonial-text">${testimonial.message}</p>
+              <div>
+                <h3>${testimonial.name}</h3>
+                <div class="d-flex justify-content-center">
+                  <img src="${testimonial.avatar}" alt="${testimonial.name}">
+                </div>
+              </div>
+            </div>`
+        }
+        testimonialsContainer.innerHTML = testimonialContent
+      }, error => {
+        testimonialsContainer.innerHTML = `<h2 class="text-lighter">${error}</h2>`
+      })
+  }
+
+  function generateRandomInts(start, end, count) {
+    var valuesInRange = (end - start) + 1
+    if (valuesInRange < count)
+      return []
+
+    var numArray = []
+    while (numArray.length < count) {
+      var genVal = generateRandomInt(start, end)
+      while (numArray.indexOf(genVal) !== -1) {
+        genVal = generateRandomInt(start, end)
+      }
+      numArray.push(genVal)
+    }
+
+    return numArray
+  }
+
+  /** generates random int between max and min, both being inclusive */
+  function generateRandomInt(max, min) {
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
+</script>
