@@ -1,0 +1,17 @@
+[admin]
+username - alicedoe
+password - abcdef*A2
+
+[cashier]
+username - johndoe
+password - abcdef*A2
+
+[customers]
+1. username - janedoe
+   password - abcdef*A2
+   accountId - 3
+
+2. username - testuser
+   password - abcdef*A2
+   accountId - 4
+
