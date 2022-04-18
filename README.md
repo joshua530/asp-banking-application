@@ -11,7 +11,7 @@
 
 ## Live demo
 > [Click here](https://) for live demo
-> ![application screenshot](https://github.com/joshua530/asp-banking-application/raw/master/screenshot.png)
+> ![application screenshot](screenshot.png)
 
 ## Description
 A banking application written in asp.net
