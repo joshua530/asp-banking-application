@@ -22,6 +22,7 @@ There are three types of users:
 - Can make wire transfers on their own.
 - They need a cashier to do cash deposits and withdrawals for them.
 - Can only view transactions related to their account
+- They also have access to a list of stock tickers on their home page which are updated after 5 minutes
 
 2. Cashiers
 - Perform cash deposits
