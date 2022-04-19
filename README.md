@@ -14,9 +14,9 @@
 > ![application screenshot](screenshot.png)
 
 ## Description
-A banking application written in asp.net
-It enables users to make transactions like wire transfers, cash deposits and overdrafts
-Users are also able to view transaction history
+A banking application written in asp.net\
+It enables users to make transactions like wire transfers, cash deposits and overdrafts\
+Users are also able to view transaction history\
 There are three types of users:
 1. Customers
 - Can make wire transfers on their own.
@@ -36,9 +36,10 @@ There are three types of users:
 - Approval of pending transactions
 - Can view all transactions for all accounts
 
-Once a new cashier or admin is created, the owner of the created account will
-need to reset their password using the **_forgot password_** option on the login page.
-The new user will then be able to access their account using their username and newly created password
+Once a new cashier or admin is created, the owner of the created account will\
+need to reset their password using the **_forgot password_** option on the login page.\
+The new user will then be able to access their account using their username and newly created password\
+**Already set up user accounts can be found in [auth.txt](auth.txt) in the project root**
 
 ## Version
 1.2
@@ -55,6 +56,4 @@ Clone the repository
 - Change directory again to **MvcBankingApplication** directory
 - Open up the integrated terminal. The keyboard shortcut is `ctrl + backtick` for linux and windows and `cmd + backtick` for mac. Alternatively, you can select `view` from the toolbar, then `terminal`.
 - Run `dotnet run` from the terminal. Alternatively, you can press `f5` to run the application in debug mode.
-
-Already set up user accounts can be found in **auth.txt** in the project root
 
