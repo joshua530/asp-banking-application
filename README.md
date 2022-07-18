@@ -2,15 +2,14 @@
 ![license](https://img.shields.io/github/license/joshua530/asp-banking-application?style=plastic&color=green)
 ***
 ## Table of contents
-- [live demo](#live-demo)
+- [preview](#preview)
 - [description](#description)
 - [version](#version)
 - [usage](#usage)
 ***
 
 
-## Live demo
-> [Click here](https://mvcbankingapplication.azurewebsites.net/) for live demo
+## Preview
 > ![application screenshot](screenshot.png)
 
 ## Description
